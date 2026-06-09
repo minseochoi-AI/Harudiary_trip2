@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@drawable/bg_card"
+    android:padding="14dp"
+    android:layout_marginBottom="8dp">
+
+    <!-- 아바타 원 -->
+    <TextView
+        android:id="@+id/tv_avatar"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:background="@drawable/bg_avatar"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- 이름 + 이메일 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp">
+
+        <TextView
+            android:id="@+id/tv_friend_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_friend_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/gray_hint"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <!-- 기록 보기 버튼 -->
+    <TextView
+        android:id="@+id/btn_view_records"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:paddingHorizontal="10dp"
+        android:text="기록 보기"
+        android:textColor="#4CAF50"
+        android:textSize="12sp"
+        android:background="@drawable/bg_button_outline"
+        android:layout_marginEnd="8dp" />
+
+    <!-- 삭제 버튼 -->
+    <TextView
+        android:id="@+id/btn_delete_friend"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:text="✕"
+        android:textColor="@color/gray_hint"
+        android:textSize="16sp"
+        android:background="?attr/selectableItemBackgroundBorderless" />
+
+</LinearLayout>

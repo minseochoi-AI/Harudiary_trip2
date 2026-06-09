@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <!-- 상단 바 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:paddingHorizontal="16dp"
+        android:background="@color/white"
+        android:elevation="2dp">
+
+        <TextView
+            android:id="@+id/btn_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:text="✕"
+            android:textSize="20sp"
+            android:textColor="@color/primary"
+            android:padding="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="활동 기록"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary" />
+
+        <TextView
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:text="저장"
+            android:textSize="15sp"
+            android:textColor="@color/primary_blue"
+            android:textStyle="bold"
+            android:padding="8dp" />
+    </RelativeLayout>
+
+    <!-- 구분선 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_border" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 자동 정보 바 (날짜 + 날씨) -->
+            <LinearLayout
+                android:id="@+id/bar_auto_info"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_auto_info_bar"
+                android:paddingHorizontal="12dp"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:id="@+id/tv_auto_datetime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="13sp"
+                    android:textColor="@color/primary_blue"
+                    android:text="날짜/시간 로딩 중..." />
+
+                <TextView
+                    android:id="@+id/tv_auto_weather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="@color/primary_blue"
+                    android:text="날씨 로딩 중..." />
+            </LinearLayout>
+
+            <!-- 시간대 섹션 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="시간대"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:id="@+id/btn_morning"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="아침"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/bg_time_slot_selected"
+                    android:layout_marginEnd="6dp" />
+
+                <TextView
+                    android:id="@+id/btn_lunch"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="점심"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_label"
+                    android:background="@drawable/bg_time_slot_default"
+                    android:layout_marginHorizontal="3dp" />
+
+                <TextView
+                    android:id="@+id/btn_evening"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="저녁"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_label"
+                    android:background="@drawable/bg_time_slot_default"
+                    android:layout_marginStart="6dp" />
+            </LinearLayout>
+
+            <!-- 활동 내용 섹션 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="활동 내용"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/et_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="96dp"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:hint="@string/hint_content"
+                android:textSize="15sp"
+                android:textColor="@color/primary"
+                android:textColorHint="@color/gray_hint"
+                android:background="@drawable/bg_time_slot_default"
+                android:padding="12dp"
+                android:layout_marginBottom="20dp" />
+
+            <!-- 사진 섹션 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="사진"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp">
+
+                <ImageView
+                    android:id="@+id/iv_photo"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/bg_thumbnail"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_photo_placeholder"
+                    android:contentDescription="사진 추가" />
+
+            </LinearLayout>
+
+            <!-- 한 줄 평가 섹션 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="한 줄 평가"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginBottom="8dp" />
+
+            <!--
+                Widget.AppCompat.RatingBar.Small 은 내부적으로 isIndicator=true를
+                강제해 터치 입력이 차단됨 → 기본 스타일로 교체하고 isIndicator=false 명시
+            -->
+            <RatingBar
+                android:id="@+id/rb_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:numStars="5"
+                android:stepSize="0.5"
+                android:rating="3.0"
+                android:isIndicator="false"
+                android:progressTint="@color/star_active"
+                android:scaleX="0.8"
+                android:scaleY="0.8"
+                android:transformPivotX="0dp"
+                android:layout_marginBottom="20dp" />
+
+            <!-- 장소 정보 바 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="장소"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_auto_info_bar"
+                android:paddingHorizontal="12dp"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="32dp">
+
+                <TextView
+                    android:id="@+id/tv_location"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="13sp"
+                    android:textColor="@color/primary_blue"
+                    android:text="위치 정보 가져오는 중..." />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GPS 자동"
+                    android:textSize="11sp"
+                    android:textColor="@color/primary_blue" />
+            </LinearLayout>
+
+            <!-- 여행 종료일 선택 바 (추가됨) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="여행 종료일"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:id="@+id/tv_end_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="미설정 (당일치기)"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_label"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_time_slot_default" />
+
+                <Button
+                    android:id="@+id/btn_select_end_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📅 날짜 선택"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/primary" />
+            </LinearLayout>
+
+            <!-- 여행 일정 생성 버튼 -->
+            <Button
+                android:id="@+id/btn_generate_travel_plan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="이 기록 기반으로 여행 일정 생성"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary"
+                android:layout_marginBottom="20dp" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

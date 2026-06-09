@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_marginEnd="6dp">
+
+    <!-- ★ ShapeableImageView: 이미지를 원형으로 정확히 클리핑 + 초록 테두리 -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_route_photo"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
+        app:strokeColor="#4CAF50"
+        app:strokeWidth="3dp"
+        android:contentDescription="경로 사진" />
+
+    <!-- 위치 핀 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="📍"
+        android:textSize="12sp" />
+
+</LinearLayout>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@drawable/bg_card"
+    android:padding="12dp"
+    android:layout_marginBottom="8dp">
+
+    <!-- 체크박스 -->
+    <CheckBox
+        android:id="@+id/cb_record"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:buttonTint="@color/primary_blue" />
+
+    <!-- 썸네일 -->
+    <ImageView
+        android:id="@+id/iv_thumb"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/bg_thumbnail"
+        android:visibility="gone"
+        android:layout_marginEnd="10dp"
+        android:contentDescription="썸네일" />
+
+    <!-- 내용 영역 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- 시간 + 시간대 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_slot_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="2dp"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                android:background="@drawable/bg_badge"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray_hint"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+        <!-- 내용 -->
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/primary"
+            android:textSize="14sp"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+</LinearLayout>

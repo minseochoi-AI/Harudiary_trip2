@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:layout_marginBottom="8dp"
+    android:animateLayoutChanges="true">
+
+    <!-- 사진 영역 (없으면 GONE) -->
+    <ImageView
+        android:id="@+id/iv_photo"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:background="@drawable/bg_thumbnail"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <!-- 본문 영역 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- 시각 + 날씨 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+            <TextView
+                android:id="@+id/tv_card_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/gray_hint"
+                android:textSize="11sp" />
+            <TextView
+                android:id="@+id/tv_card_weather"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primary_blue"
+                android:textSize="11sp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- 내용 -->
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary"
+            android:textSize="15sp"
+            android:lineSpacingExtra="2dp" />
+
+        <!-- 별점 + 주소 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/tv_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/star_active"
+                android:textSize="13sp" />
+            <TextView
+                android:id="@+id/tv_location"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:textColor="@color/gray_hint"
+                android:textSize="12sp"
+                android:maxLines="2"
+                android:ellipsize="end" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ★ 리액션 바 (클릭 시 등장, 기본 GONE) -->
+    <LinearLayout
+        android:id="@+id/reaction_bar"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@drawable/bg_reaction_bar"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <!-- 하트 버튼 -->
+        <LinearLayout
+            android:id="@+id/btn_heart"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingEnd="20dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+            <TextView
+                android:id="@+id/tv_heart_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🤍"
+                android:textSize="20sp" />
+            <TextView
+                android:id="@+id/tv_heart_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="0"
+                android:textColor="@color/gray_hint"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- 댓글 버튼 -->
+        <LinearLayout
+            android:id="@+id/btn_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💬"
+                android:textSize="18sp" />
+            <TextView
+                android:id="@+id/tv_comment_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="0"
+                android:textColor="@color/gray_hint"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- 스페이서 -->
+        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+        <!-- 닫기 -->
+        <TextView
+            android:id="@+id/btn_close_reaction"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="✕"
+            android:textSize="13sp"
+            android:textColor="@color/gray_hint"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+    </LinearLayout>
+
+</LinearLayout>

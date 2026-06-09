@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <!-- 상단 바 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:paddingHorizontal="8dp"
+        android:background="@color/white"
+        android:elevation="2dp">
+
+        <TextView
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:text="← 취소"
+            android:textSize="15sp"
+            android:textColor="@color/gray_label"
+            android:padding="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="기록 삭제"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary" />
+
+        <TextView
+            android:id="@+id/tv_header_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:textSize="13sp"
+            android:textColor="@color/gray_hint"
+            android:padding="8dp" />
+
+    </RelativeLayout>
+
+    <!-- 구분선 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_border" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="100dp">
+
+            <!-- 전체 삭제 버튼 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/white"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="전체 삭제"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/btn_delete_all"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:text="🗑  이 날의 모든 기록 삭제"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_delete_all_btn" />
+
+            </LinearLayout>
+
+            <!-- 구분선 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#F2F4F7" />
+
+            <!-- 개별 선택 섹션 헤더 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="6dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="개별 선택 삭제"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- 전체 선택/해제 체크박스 -->
+                <CheckBox
+                    android:id="@+id/cb_select_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="전체 선택"
+                    android:textColor="@color/gray_label"
+                    android:textSize="13sp"
+                    android:buttonTint="@color/primary_blue" />
+
+            </LinearLayout>
+
+            <!-- 기록 목록 (동적으로 추가됨) -->
+            <LinearLayout
+                android:id="@+id/ll_record_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- 하단 선택 삭제 버튼 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/white"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:elevation="8dp">
+
+        <TextView
+            android:id="@+id/btn_delete_selected"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:gravity="center"
+            android:text="선택한 기록 삭제 (0개)"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_button_primary"
+            android:alpha="0.5" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="44dp"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingTop="2dp">
+
+    <!-- 날짜 숫자 (선택 시 파란 원형 배경) -->
+    <TextView
+        android:id="@+id/tv_day"
+        android:layout_width="32dp"
+        android:layout_height="28dp"
+        android:gravity="center"
+        android:textSize="13sp" />
+
+    <!-- 기록 dot (기록 있는 날짜에 표시) -->
+    <View
+        android:id="@+id/v_dot"
+        android:layout_width="5dp"
+        android:layout_height="5dp"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/bg_dot_record"
+        android:visibility="invisible" />
+
+</LinearLayout>

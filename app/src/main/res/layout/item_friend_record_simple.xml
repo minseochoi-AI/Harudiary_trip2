@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/bg_card">
+
+    <!-- 좌측: 날짜 + 제목 + 미리보기 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- 날짜 -->
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- 내용 미리보기 -->
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/gray_text"
+            android:textSize="13sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:lineSpacingExtra="2dp" />
+
+    </LinearLayout>
+
+    <!-- 우측: 썸네일 이미지 -->
+    <ImageView
+        android:id="@+id/iv_thumbnail"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="12dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:contentDescription="기록 썸네일" />
+
+</LinearLayout>

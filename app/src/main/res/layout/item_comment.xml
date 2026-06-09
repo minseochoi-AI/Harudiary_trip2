@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="top"
+    android:paddingVertical="8dp">
+
+    <!-- 아바타 -->
+    <TextView
+        android:id="@+id/tv_comment_avatar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@drawable/bg_avatar_small"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <!-- 이름 + 내용 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_comment_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_comment_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray_hint"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_comment_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/gray_text"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp" />
+
+    </LinearLayout>
+
+    <!-- 본인 댓글 삭제 버튼 (숨김, 필요 시 표시) -->
+    <TextView
+        android:id="@+id/btn_delete_comment"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:gravity="center"
+        android:text="✕"
+        android:textSize="11sp"
+        android:textColor="@color/gray_hint"
+        android:visibility="gone"
+        android:background="?attr/selectableItemBackgroundBorderless" />
+
+</LinearLayout>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="2dp">
+
+    <!-- 날짜 행: • 날짜 ── 조회수 N -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="12dp">
+
+        <TextView
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/bg_dot_record"
+            android:layout_marginEnd="10dp" />
+
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- 제목 -->
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/primary"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- 구분선 (제목 아래) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="6dp"
+        android:background="@color/gray_border" />
+
+    <!-- 내용 + 썸네일 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="6dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/gray_text"
+            android:textSize="13sp"
+            android:maxLines="3"
+            android:lineSpacingExtra="2dp"
+            android:ellipsize="end" />
+
+        <ImageView
+            android:id="@+id/iv_thumbnail"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginStart="12dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:background="@drawable/bg_thumbnail"
+            android:contentDescription="썸네일" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card_food"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_marginBottom="8dp"
+    android:gravity="center_vertical">
+
+        <LinearLayout
+        android:id="@+id/layout_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+<ImageView
+        android:id="@+id/iv_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_restaurant_fork" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp">
+
+        <TextView
+            android:id="@+id/tv_place_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />        <TextView
+            android:id="@+id/tv_travel_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/gray_label"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tv_time_spent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#555555"
+            android:textSize="12sp"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/layout_webview"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone">
+
+        <WebView
+            android:id="@+id/webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:id="@+id/btn_close_webview"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:tint="#888888" />
+    </FrameLayout>
+</LinearLayout>

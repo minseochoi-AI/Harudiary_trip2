@@ -1,0 +1,76 @@
+<resources>
+    <string name="app_name">하루 기록</string>
+    <string name="app_slogan">아침, 점심, 저녁의 기록이 모여\n하루가 됩니다</string>
+
+    <!-- 힌트 -->
+    <string name="hint_name">홍길동</string>
+    <string name="hint_email">example@email.com</string>
+    <string name="hint_password">••••••••</string>
+    <string name="hint_content">오늘 하루를 기록해보세요...</string>
+
+    <!-- 라벨 -->
+    <string name="label_login">로그인</string>
+    <string name="label_signup">가입하기</string>
+    <string name="label_save">저장</string>
+    <string name="label_logout">로그아웃</string>
+    <string name="label_withdraw">회원탈퇴</string>
+    <string name="label_name">이름</string>
+    <string name="label_email">이메일</string>
+    <string name="label_password">비밀번호</string>
+    <string name="label_password_confirm">비밀번호 확인</string>
+    <string name="label_morning">아침</string>
+    <string name="label_lunch">점심</string>
+    <string name="label_evening">저녁</string>
+    <string name="label_settings">설정</string>
+    <string name="label_signup_title">회원가입</string>
+
+    <!-- 링크 텍스트 -->
+    <string name="link_to_signup">계정이 없으신가요? 회원가입</string>
+    <string name="link_to_login">이미 계정이 있으신가요? 로그인</string>
+
+    <!-- 토스트 메시지 -->
+    <string name="msg_empty_field">모든 필드를 입력해주세요</string>
+    <string name="msg_invalid_email">이메일 형식이 올바르지 않습니다</string>
+    <string name="msg_password_mismatch">비밀번호가 일치하지 않습니다</string>
+    <string name="msg_duplicate_email">이미 사용 중인 이메일입니다</string>
+    <string name="msg_signup_complete">가입이 완료되었습니다</string>
+    <string name="msg_login_failed">이메일 또는 비밀번호가 올바르지 않습니다</string>
+
+    <!-- Phase 2: 메인 홈 / 일별 조회 -->
+    <string name="label_recent">최근 기록</string>
+    <string name="label_add_record">기록 추가</string>
+    <string name="label_map_placeholder">지도는 Phase 4에서 구현됩니다</string>
+
+    <!-- Phase 3: 활동 기록 -->
+    <string name="label_record_title">활동 기록</string>
+    <string name="label_time_slot">시간대</string>
+    <string name="label_content">활동 내용</string>
+    <string name="label_photo">사진</string>
+    <string name="label_rating">한 줄 평가</string>
+    <string name="label_location">장소</string>
+    <string name="msg_save_success">기록이 저장되었습니다</string>
+    <string name="msg_save_fail">저장에 실패했습니다</string>
+    <string name="msg_empty_content">활동 내용을 입력해주세요</string>
+    <string name="msg_no_location_permission">위치 권한이 없습니다</string>
+
+    <!-- Phase 4: 설정 / 알림 -->
+    <string name="label_settings_title">설정</string>
+    <string name="label_alarm_section">기록 알림</string>
+    <string name="label_alarm_on">알림 사용</string>
+    <string name="label_alarm_morning">아침 알림</string>
+    <string name="label_alarm_lunch">점심 알림</string>
+    <string name="label_alarm_evening">저녁 알림</string>
+    <string name="label_account_section">계정</string>
+    <string name="label_map_no_location">위치 정보가 있는 기록이 없습니다</string>
+    <string name="msg_withdraw_confirm">탈퇴하면 모든 기록이 삭제됩니다.\n정말 탈퇴하시겠습니까?</string>
+
+    <!-- Phase 5: 친구 시스템 -->
+    <string name="label_friend_search">친구 검색</string>
+    <string name="label_friend_requests">친구 요청</string>
+    <string name="label_friend_browse">친구 기록 둘러보기</string>
+    <string name="label_friend_browse_subtitle">친구들의 기록을 구경해 보세요 ✨</string>
+    <string name="msg_friend_request_sent">친구 요청을 보냈습니다</string>
+    <string name="msg_friend_accepted">친구가 되었습니다! 🎉</string>
+    <string name="msg_friend_rejected">요청을 거절했습니다</string>
+    <string name="msg_no_pending_requests">새로운 친구 요청이 없습니다</string>
+</resources>

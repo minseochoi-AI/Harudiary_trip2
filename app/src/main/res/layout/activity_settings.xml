@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <!-- 상단 바 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:paddingHorizontal="16dp"
+        android:background="@color/white"
+        android:elevation="2dp">
+
+        <TextView
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:text="←"
+            android:textSize="20sp"
+            android:textColor="@color/primary"
+            android:padding="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="설정"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_border" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 섹션: 기록 알림 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="기록 알림"
+                android:textSize="12sp"
+                android:textColor="@color/gray_hint"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="8dp"
+                android:background="#F9F9F9" />
+
+            <!-- 알림 ON/OFF -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:gravity="center_vertical"
+                android:background="@color/white">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="알림 사용"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_alarm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/gray_border" android:layout_marginStart="16dp" android:layout_marginEnd="16dp" />
+
+            <!-- 아침 알림 시간 -->
+            <LinearLayout
+                android:id="@+id/row_alarm_morning"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:gravity="center_vertical"
+                android:background="@color/white">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="아침 알림"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tv_alarm_morning"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="08:00"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary_blue" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/gray_border" android:layout_marginStart="16dp" android:layout_marginEnd="16dp" />
+
+            <!-- 점심 알림 시간 -->
+            <LinearLayout
+                android:id="@+id/row_alarm_lunch"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:gravity="center_vertical"
+                android:background="@color/white">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="점심 알림"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tv_alarm_lunch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="12:30"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary_blue" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/gray_border" android:layout_marginStart="16dp" android:layout_marginEnd="16dp" />
+
+            <!-- 저녁 알림 시간 -->
+            <LinearLayout
+                android:id="@+id/row_alarm_evening"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:gravity="center_vertical"
+                android:background="@color/white">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="저녁 알림"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tv_alarm_evening"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="20:00"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary_blue" />
+            </LinearLayout>
+
+            <!-- 섹션: 계정 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="계정"
+                android:textSize="12sp"
+                android:textColor="@color/gray_hint"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="8dp"
+                android:background="#F9F9F9" />
+
+            <!-- 이메일 표시 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:gravity="center_vertical"
+                android:background="@color/white">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="이메일"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tv_user_email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="@color/gray_hint" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/gray_border" />
+
+            <!-- 로그아웃 -->
+            <TextView
+                android:id="@+id/btn_logout"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:text="로그아웃"
+                android:textSize="15sp"
+                android:textColor="@color/primary"
+                android:background="@color/white" />
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/gray_border" />
+
+            <!-- 회원탈퇴 -->
+            <TextView
+                android:id="@+id/btn_withdraw"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:text="회원탈퇴"
+                android:textSize="15sp"
+                android:textColor="@color/danger"
+                android:background="@color/white" />
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/gray_border" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

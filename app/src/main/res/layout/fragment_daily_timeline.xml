@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- ── 아침 섹션 ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_morning_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_morning"
+                    android:textColor="@color/morning"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_morning_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/gray_hint"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <!-- ★ LinearLayout (vertical) — 여러 카드 세로로 쌓기 -->
+            <LinearLayout
+                android:id="@+id/fl_morning"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+        <!-- ── 점심 섹션 ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_lunch_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_lunch"
+                    android:textColor="@color/lunch"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_lunch_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/gray_hint"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fl_lunch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+        <!-- ── 저녁 섹션 ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_evening_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_evening"
+                    android:textColor="@color/evening"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_evening_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/gray_hint"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fl_evening"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+        <!-- ★ 기타(시간대 미지정) 섹션 — 기록 있을 때만 표시 -->
+        <LinearLayout
+            android:id="@+id/section_other"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="기타"
+                    android:textColor="@color/gray_label"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_other_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/gray_hint"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fl_other"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+        <!-- ★ 추천된 여행 일정 (제미나이 AI) -->
+        <LinearLayout
+            android:id="@+id/section_travel_plan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✨ 추천된 여행 일정"
+                android:textColor="@color/primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_travel_plan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <Button
+                android:id="@+id/btn_save_plan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="일정 확정 및 저장"
+                android:backgroundTint="@color/primary"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

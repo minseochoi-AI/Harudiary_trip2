@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F8FA">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="80dp">
+
+            <!-- ── 헤더 ─────────────────────────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp"
+                android:background="#FFFFFF">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="하루 기록"
+                    android:textColor="@color/primary"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.02" />
+
+                <!-- ★ 검색 아이콘 (벡터 아이콘) -->
+                <ImageView
+                    android:id="@+id/btn_friend_search"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_search"
+                    android:contentDescription="친구 검색"
+                    android:background="?attr/selectableItemBackgroundBorderless" />
+
+                <!-- ★ 알림 아이콘 (벡터 아이콘) -->
+                <FrameLayout
+                    android:id="@+id/btn_notifications"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_bell"
+                        android:contentDescription="알림"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
+                    <TextView
+                        android:id="@+id/tv_badge"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="2dp"
+                        android:background="@drawable/bg_badge"
+                        android:gravity="center"
+                        android:textColor="@color/white"
+                        android:textSize="8sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <!-- ── 캘린더 카드 ─────────────────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:orientation="vertical"
+                android:paddingBottom="8dp">
+
+                <!-- 월 네비게이션 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_month"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_prev_month"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:gravity="center"
+                        android:text="◀"
+                        android:textColor="@color/gray_hint"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/btn_next_month"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:gravity="center"
+                        android:text="▶"
+                        android:textColor="@color/gray_hint"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+                <!-- 달력 그리드 -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_calendar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never" />
+
+                <!-- 접기/펼치기 핸들 -->
+                <LinearLayout
+                    android:id="@+id/btn_toggle_calendar"
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <View
+                        android:layout_width="40dp"
+                        android:layout_height="4dp"
+                        android:background="@drawable/bg_drag_handle" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ── 스트릭 + 이달 기록 통계 ───────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_stats_card"
+                android:orientation="horizontal"
+                android:paddingVertical="16dp">
+
+                <!-- 스트릭 (오늘 작성 N일째) -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="오늘 작성 ①"
+                        android:textColor="@color/gray_hint"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/tv_streak"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="0일째 작성 중"
+                        android:textColor="#4CAF50"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- 구분선 -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/gray_border" />
+
+                <!-- 이달 기록 수 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="이달 기록"
+                        android:textColor="@color/gray_hint"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/tv_monthly_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="🌸0일"
+                        android:textColor="@color/danger"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ── Today 섹션 ─────────────────────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_today_section"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="14dp">
+
+                <!-- Today 텍스트 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today"
+                    android:textColor="#4CAF50"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05" />
+
+                <!-- 날짜 숫자 + 화살표 + 프로필 사진들 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:id="@+id/btn_prev_day"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:gravity="center"
+                        android:text="◀"
+                        android:textColor="@color/gray_hint"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tv_today_day"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/primary"
+                        android:textSize="42sp"
+                        android:textStyle="bold"
+                        android:layout_marginHorizontal="8dp" />
+
+                    <TextView
+                        android:id="@+id/btn_next_day"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:gravity="center"
+                        android:text="▶"
+                        android:textColor="@color/gray_hint"
+                        android:textSize="14sp" />
+
+                    <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+                    <!-- 오늘 기록 썸네일들 (최대 3개) -->
+                    <LinearLayout
+                        android:id="@+id/ll_today_thumbs"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                </LinearLayout>
+
+                <!-- 마지막 기록 시각 -->
+                <TextView
+                    android:id="@+id/tv_last_record_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/gray_hint"
+                    android:textSize="12sp"
+                    android:gravity="end" />
+
+                <!-- 초록 구분선 -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginTop="12dp"
+                    android:background="#4CAF50" />
+
+            </LinearLayout>
+
+            <!-- ── DEAR 섹션 + 오늘의 질문 ───────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_question_card"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_dear_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_add_from_question"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:gravity="center"
+                        android:text="+"
+                        android:textSize="22sp"
+                        android:textColor="#4CAF50"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_daily_question"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/gray_text"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="4dp" />
+
+                <!-- 초록 구분선 -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginTop="12dp"
+                    android:background="#4CAF50" />
+
+            </LinearLayout>
+
+            <!-- ── 오늘 촬영한 사진들 ────────────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_stats_card"
+                android:orientation="vertical"
+                android:paddingVertical="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="오늘 촬영한 사진"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:overScrollMode="never">
+
+                    <LinearLayout
+                        android:id="@+id/ll_today_photos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp" />
+
+                </HorizontalScrollView>
+
+                <TextView
+                    android:id="@+id/tv_no_photos"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:gravity="center"
+                    android:text="이 날 촬영한 사진이 없어요"
+                    android:textColor="@color/gray_hint"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <!-- ── 친구 기록 둘러보기 ─────────────────────── -->
+            <LinearLayout
+                android:id="@+id/section_friend_browse"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginHorizontal="16dp"
+                android:background="@drawable/bg_stats_card"
+                android:orientation="vertical"
+                android:paddingVertical="14dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="친구 기록 둘러보기"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="친구들의 기록을 구경해 보세요 ✨"
+                    android:textColor="@color/gray_hint"
+                    android:textSize="12sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_friend_browse"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:overScrollMode="never"
+                    android:paddingHorizontal="16dp" />
+
+                <TextView
+                    android:id="@+id/tv_friend_browse_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+                    android:text="친구의 기록이 아직 없습니다"
+                    android:textColor="@color/gray_hint"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <!-- ★ 최근 기록 (숨김 - 하단 없음) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_recent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <!-- 설정 버튼 (숨겨진 호환용) -->
+            <TextView
+                android:id="@+id/tv_settings"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
