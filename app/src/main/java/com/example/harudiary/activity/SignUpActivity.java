@@ -14,8 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.harudiary.R;
-import com.example.harudiary.db.DBHelper;
-import com.example.harudiary.db.UserDAO;
 
 public class SignUpActivity extends AppCompatActivity {
 

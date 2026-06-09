@@ -28,4 +28,8 @@ public class RetrofitClient {
         }
         return retrofit;
     }
+
+    public static Retrofit getInstance() {
+        return getClient();
+    }
 }

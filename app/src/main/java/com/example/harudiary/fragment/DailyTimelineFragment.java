@@ -37,6 +37,7 @@ import com.example.harudiary.model.DayPlanDto;
 import com.example.harudiary.model.PlaceDto;
 import com.example.harudiary.api.RetrofitClient;
 import com.example.harudiary.api.TravelApi;
+import com.example.harudiary.api.DiaryApi;
 
 import retrofit2.Call;
 import retrofit2.Callback;

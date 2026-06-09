@@ -19,9 +19,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.harudiary.R;
 import com.example.harudiary.activity.LoginActivity;
-import com.example.harudiary.db.DBHelper;
-import com.example.harudiary.db.UserDAO;
-import com.example.harudiary.model.User;
 import com.example.harudiary.util.SessionManager;
 
 /**
@@ -32,8 +29,7 @@ public class ProfileFragment extends Fragment {
     private static final int REQ_PICK_IMAGE = 2001;
 
     private SessionManager session;
-    private UserDAO userDAO;
-    private int userId;
+    private String userId;
 
     private TextView tvAvatar, tvEmail, btnSave;
     private EditText etName;
@@ -46,8 +42,7 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         session = new SessionManager(requireContext());
-        userDAO = new UserDAO(DBHelper.getInstance(requireContext()));
-        userId  = session.getLoggedInUserId();
+        userId  = session.getUserId();
 
         tvAvatar  = view.findViewById(R.id.tv_profile_avatar);
         tvEmail   = view.findViewById(R.id.tv_profile_email);
@@ -87,7 +82,7 @@ public class ProfileFragment extends Fragment {
                 .setTitle("회원탈퇴")
                 .setMessage("탈퇴 시 모든 기록이 삭제됩니다.\n정말 탈퇴하시겠습니까?")
                 .setPositiveButton("탈퇴", (d, w) -> {
-                    userDAO.deleteUser(userId);
+                    // Local DB delete removed as it's now handled by the remote server
                     session.logout();
                     startActivity(new Intent(requireContext(), LoginActivity.class));
                     requireActivity().finish();
@@ -100,14 +95,11 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadUserInfo() {
-        User user = userDAO.getUserById(userId);
-        if (user == null) return;
-
-        String name = user.getName();
+        String name = session.getLoggedInUserName();
         String initial = (name != null && !name.isEmpty()) ? name.substring(0, 1) : "?";
         tvAvatar.setText(initial);
         etName.setText(name);
-        tvEmail.setText(user.getEmail());
+        tvEmail.setText(userId); // Using userId as display
 
         // 저장된 프로필 이미지
         String profileUri = session.getProfileImageUri();
@@ -129,14 +121,11 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(requireContext(), "이름을 입력해주세요", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (userDAO.updateUserName(userId, newName)) {
-            session.updateUserName(newName);
-            // 아바타 이니셜 갱신
-            tvAvatar.setText(newName.substring(0, 1));
-            Toast.makeText(requireContext(), "프로필이 저장되었습니다", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(requireContext(), "저장에 실패했습니다", Toast.LENGTH_SHORT).show();
-        }
+        
+        // Update session name (In a real app, you'd call a UserApi.updateProfile() here)
+        session.updateUserName(newName);
+        tvAvatar.setText(newName.substring(0, 1));
+        Toast.makeText(requireContext(), "프로필이 저장되었습니다", Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -22,8 +22,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.harudiary.R;
-import com.example.harudiary.db.ActivityDAO;
-import com.example.harudiary.db.DBHelper;
 import com.example.harudiary.model.Record;
 import com.example.harudiary.api.RetrofitClient;
 import com.example.harudiary.api.TravelApi;
@@ -398,7 +396,7 @@ public class RecordActivity extends AppCompatActivity {
                     currentAddress = (String) body.get("address");
                     currentWeather = (String) body.get("weather");
                     currentTemperature = ((Number) body.get("temperature")).floatValue();
-                    
+
                     runOnUiThread(() -> {
                         tvLocation.setText("📍 " + currentAddress);
                         tvAutoWeather.setText(currentWeather + " " + currentTemperature + "℃");

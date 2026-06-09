@@ -2,7 +2,7 @@ package com.example.harudiary.model;
 
 public class Record {
     private int activityId;
-    private int userId;
+    private String userId;
     private String date;       // YYYY-MM-DD
     private String timeSlot;   // morning / lunch / evening
     private String content;
@@ -20,8 +20,8 @@ public class Record {
     public int getActivityId() { return activityId; }
     public void setActivityId(int activityId) { this.activityId = activityId; }
 
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }

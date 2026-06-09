@@ -22,7 +22,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Harudiary">
+        android:theme="@style/Theme.Harudiary"
+        android:usesCleartextTraffic="true">
 
         <meta-data
             android:name="com.kakao.vectormap.APP_KEY"

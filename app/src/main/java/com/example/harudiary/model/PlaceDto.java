@@ -15,6 +15,12 @@ public class PlaceDto {
     @SerializedName("place_category")
     private String placeCategory;
 
+    @SerializedName("time_spent_hours")
+    private Double timeSpentHours;
+
+    @SerializedName("place_url")
+    private String placeUrl;
+
     public String getPlaceName() { return placeName; }
     public void setPlaceName(String placeName) { this.placeName = placeName; }
     public int getTravelTimeMinutesToNext() { return travelTimeMinutesToNext; }
@@ -23,4 +29,20 @@ public class PlaceDto {
     public void setTransportMode(String transportMode) { this.transportMode = transportMode; }
     public String getPlaceCategory() { return placeCategory; }
     public void setPlaceCategory(String placeCategory) { this.placeCategory = placeCategory; }
+
+    public Double getTimeSpentHours() {
+        return timeSpentHours;
+    }
+
+    public void setTimeSpentHours(Double timeSpentHours) {
+        this.timeSpentHours = timeSpentHours;
+    }
+
+    public String getPlaceUrl() {
+        return placeUrl;
+    }
+
+    public void setPlaceUrl(String placeUrl) {
+        this.placeUrl = placeUrl;
+    }
 }

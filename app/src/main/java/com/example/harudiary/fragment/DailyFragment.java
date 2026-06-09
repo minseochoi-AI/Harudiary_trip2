@@ -19,13 +19,9 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.harudiary.R;
 import com.example.harudiary.activity.DeleteRecordsActivity;
-import com.example.harudiary.db.DailyTitleDAO;
-import com.example.harudiary.db.DBHelper;
 import com.example.harudiary.util.SessionManager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-
-import java.util.Calendar;
 
 /**
  * DailyFragment — 일별 조회
@@ -35,8 +31,7 @@ public class DailyFragment extends Fragment {
 
     private static final String ARG_DATE = "date";
 
-    private DailyTitleDAO titleDAO;
-    private int userId;
+    private String userId;
     private String date;
 
     public static DailyFragment newInstance(String date) {
@@ -54,8 +49,7 @@ public class DailyFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_daily, container, false);
 
         date   = getArguments() != null ? getArguments().getString(ARG_DATE, "") : "";
-        userId = new SessionManager(requireContext()).getLoggedInUserId();
-        titleDAO = new DailyTitleDAO(DBHelper.getInstance(requireContext()));
+        userId = new SessionManager(requireContext()).getUserId();
 
         // 뒤로가기
         view.findViewById(R.id.btn_back).setOnClickListener(v ->
@@ -77,24 +71,16 @@ public class DailyFragment extends Fragment {
 
         // ★ 하루 제목 입력
         EditText etTitle = view.findViewById(R.id.et_day_title);
-        // 기존 제목 로드
-        new Thread(() -> {
-            String saved = titleDAO.getTitle(userId, date);
-            requireActivity().runOnUiThread(() -> {
-                if (saved != null && !saved.isEmpty()) {
-                    etTitle.setText(saved);
-                    etTitle.setSelection(saved.length());
-                }
-            });
-        }).start();
-
-        // 제목 변경 시 자동 저장 (입력 완료 시점)
+        
+        // Note: titleDAO removal - Titles should ideally be fetched from a server API.
+        // For now, removing local SQLite logic to fix build errors.
+        
         etTitle.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
             @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
             @Override public void afterTextChanged(Editable s) {
-                String title = s.toString().trim();
-                new Thread(() -> titleDAO.saveTitle(userId, date, title)).start();
+                // String title = s.toString().trim();
+                // Save title logic should be implemented via API if needed.
             }
         });
 

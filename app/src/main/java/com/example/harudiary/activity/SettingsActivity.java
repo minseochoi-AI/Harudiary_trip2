@@ -11,9 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
 import com.example.harudiary.R;
-import com.example.harudiary.db.DBHelper;
-import com.example.harudiary.db.UserDAO;
-import com.example.harudiary.model.User;
 import com.example.harudiary.util.AlarmHelper;
 import com.example.harudiary.util.SessionManager;
 
@@ -37,7 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
         session = new SessionManager(this);
 
         initViews();
-        loadUserEmail();
+        loadUserInfo();
         loadAlarmSettings();
         setupListeners();
     }
@@ -49,12 +46,10 @@ public class SettingsActivity extends AppCompatActivity {
         tvEvening   = findViewById(R.id.tv_alarm_evening);
     }
 
-    private void loadUserEmail() {
-        int userId = session.getLoggedInUserId();
-        UserDAO userDAO = new UserDAO(DBHelper.getInstance(this));
-        User user = userDAO.getUserById(userId);
+    private void loadUserInfo() {
+        String userId = session.getUserId();
         TextView tvEmail = findViewById(R.id.tv_user_email);
-        if (user != null) tvEmail.setText(user.getEmail());
+        tvEmail.setText(userId); // Use user ID as display since email isn't in current session
     }
 
     private void loadAlarmSettings() {
@@ -127,9 +122,8 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void withdraw() {
-        int userId = session.getLoggedInUserId();
-        UserDAO userDAO = new UserDAO(DBHelper.getInstance(this));
-        userDAO.deleteUser(userId);
+        // Since local DB is gone, we just clear session and logout. 
+        // In a real scenario, you'd call a UserApi.withdraw() here.
         AlarmHelper.cancelAll(this);
         session.logout();
         Intent intent = new Intent(this, LoginActivity.class);

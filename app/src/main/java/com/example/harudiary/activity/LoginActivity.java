@@ -12,8 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.harudiary.MainActivity;
 import com.example.harudiary.R;
-import com.example.harudiary.db.DBHelper;
-import com.example.harudiary.db.UserDAO;
 import com.example.harudiary.model.User;
 import com.example.harudiary.util.SessionManager;
 

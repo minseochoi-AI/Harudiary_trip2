@@ -9,6 +9,7 @@ public class SessionManager {
     private static final String KEY_USER_ID   = "user_id";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_PROFILE_URI = "profile_uri";
+    private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final int    NO_USER = -1;
 
     private final SharedPreferences prefs;
@@ -25,12 +26,20 @@ public class SessionManager {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
         editor.putString(KEY_USER_ID, userId);
-        editor.putString(KEY_NAME, name);
+        editor.putString(KEY_USER_NAME, name);
         editor.apply();
     }
 
     public String getUserId() {
         return prefs.getString(KEY_USER_ID, "-1");
+    }
+
+    public int getLoggedInUserId() {
+        try {
+            return Integer.parseInt(getUserId());
+        } catch (NumberFormatException e) {
+            return NO_USER;
+        }
     }
 
     public String getLoggedInUserName() { return prefs.getString(KEY_USER_NAME, ""); }
@@ -51,6 +60,11 @@ public class SessionManager {
     public boolean isLoggedIn() { return getLoggedInUserId() != NO_USER; }
 
     public void logout() {
-        prefs.edit().remove(KEY_USER_ID).remove(KEY_USER_NAME).remove(KEY_PROFILE_URI).apply();
+        prefs.edit()
+            .remove(KEY_USER_ID)
+            .remove(KEY_USER_NAME)
+            .remove(KEY_PROFILE_URI)
+            .remove(KEY_IS_LOGGED_IN)
+            .apply();
     }
 }

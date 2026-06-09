@@ -3,7 +3,6 @@ package com.example.harudiary.api;
 import com.example.harudiary.model.TimelineDTO;
 import com.example.harudiary.model.User;
 import com.example.harudiary.model.FriendRequest;
-import com.example.harudiary.model.Friend;
 import java.util.List;
 import java.util.Map;
 import retrofit2.Call;
@@ -30,6 +29,9 @@ public interface FriendApi {
 
     @GET("/api/friend/browse/{userId}")
     Call<List<Map<String, Object>>> getFriendBrowseList(@Path("userId") String userId);
+
+    @POST("/api/friend/request")
+    Call<Map<String, Object>> requestFriend(@Body Map<String, String> payload);
 
     @POST("/api/friend/request")
     Call<FriendRequest> sendRequest(@Body Map<String, String> payload);
