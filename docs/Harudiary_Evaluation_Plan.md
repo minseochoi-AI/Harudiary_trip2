@@ -291,3 +291,39 @@ private static final String BASE_URL = "http://123.45.67.89:8083/";
 앱이 서버의 IP를 찾아오더라도, 서버의 문이 닫혀있으면 튕겨납니다. 도커는 이미 8083 포트를 열어두고 기다리고 있지만, 우분투 OS 자체의 방화벽(ufw)이나, 만약 AWS/GCP 같은 클라우드를 쓰신다면 클라우드의 '보안 그룹(Security Group)' 설정에서 8083 포트로 외부 접속(Inbound)이 들어올 수 있도록 허용(Open)해 주셔야 합니다.
 
 요약하자면: 현재 도커 자체는 정상적으로 요청을 받을 준비가 되어 있지만, 앱이 찾아가는 목적지 주소(10.0.2.2)가 개발용으로만 설정되어 있기 때문에 외부 사용자는 접속할 수 없는 상태입니다.
+
+
+8건 이슈 수정 작업 추적
+
+## 1단계: 프론트 DTO 정합성 (이슈 #8)
+- [x] PlaceDto.java에 addressName, x, y, dayNumber 필드 + getter/setter 추가
+- [x] Serializable 구현 추가
+
+## 2단계: 백엔드 키워드 추출 강화 + 프론트 힌트 (이슈 #1)
+- [x] GeminiOrchestrationService.java fallback 로직 추가
+- [x] RecordActivity.java 에러 핸들링 추가
+
+## 3단계: 날짜 정보 저장 보정 + 중복 체크 (이슈 #3)
+- [x] TravelApi.java savePlan에 date 파라미터 추가
+- [x] TravelController.java에 date 파라미터 추가
+- [x] TravelPlanService.java에 date + 중복 체크 로직 추가
+- [x] DiaryRepository에 findByUserAndDate 추가
+
+## 4단계: Days 데이터 보존 (이슈 #9)
+- [x] (5단계 TravelPlanActivity에서 통합 구현)
+
+## 5단계: TravelPlanActivity 신설 (이슈 #2 + #4)
+- [x] TravelPlanResponse, DayPlanDto에 Serializable 추가
+- [x] activity_travel_plan.xml 레이아웃 생성
+- [x] TravelPlanActivity.java 생성
+- [x] RecordActivity.java generateTravelPlan() → TravelPlanActivity 전환
+- [x] DailyTimelineFragment.java에서 계획 관련 코드 제거
+- [x] AndroidManifest.xml에 TravelPlanActivity 등록
+
+## 6단계: 역방향 흐름 (이슈 #6)
+- [x] TravelPlanAdapter.java에 OnVisitCompleteListener + 방문완료 버튼
+- [x] RecordActivity.java에 EXTRA_PREFILL_* pre-fill 로직
+
+## 7단계: 독립적 계획 진입로 (이슈 #7)
+- [x] MainActivity.java nav_add 분기 팝업
+- [x] RecordActivity.java EXTRA_MODE="plan" 모드 분기
