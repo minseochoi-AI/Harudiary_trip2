@@ -163,8 +163,18 @@ public class MainActivity extends AppCompatActivity {
         navList.setOnClickListener(v -> showTab(1));
         navFriend.setOnClickListener(v -> showTab(2));
         navSettings.setOnClickListener(v -> showTab(3));
-        navAdd.setOnClickListener(v ->
-                startActivity(new Intent(this, RecordActivity.class)));
+        navAdd.setOnClickListener(v -> {
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+            String[] options = {"📝 기록 작성", "✈️ 여행 계획"};
+            builder.setItems(options, (dialog, which) -> {
+                Intent intent = new Intent(this, RecordActivity.class);
+                if (which == 1) {
+                    intent.putExtra(RecordActivity.EXTRA_MODE, "plan");
+                }
+                startActivity(intent);
+            });
+            builder.show();
+        });
 
         updateNavHighlight(0);
     }

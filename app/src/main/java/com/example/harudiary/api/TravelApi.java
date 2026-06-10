@@ -33,7 +33,8 @@ public interface TravelApi {
     Call<Void> savePlan(
             @Body TravelPlanResponse request, 
             @Query("userId") String userId, 
-            @Query("diaryId") Integer diaryId
+            @Query("diaryId") Integer diaryId,
+            @Query("date") String date
     );
 
     class DiaryRecommendRequest {

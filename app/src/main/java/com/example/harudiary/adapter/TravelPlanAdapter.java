@@ -21,16 +21,23 @@ import java.util.List;
 
 public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.ViewHolder> {
 
+    public interface OnVisitCompleteListener {
+        void onVisitComplete(PlaceDto place);
+    }
+
     private static final int TYPE_FOOD = 0;
     private static final int TYPE_TOUR = 1;
     private static final int TYPE_LODGING = 2;
     private static final int TYPE_TRANSPORT = 3;
     private static final int TYPE_DEFAULT = 4;
+    private static final int TYPE_HEADER = 5;
 
     private List<PlaceDto> places;
+    private OnVisitCompleteListener listener;
 
-    public TravelPlanAdapter(List<PlaceDto> places) {
+    public TravelPlanAdapter(List<PlaceDto> places, OnVisitCompleteListener listener) {
         this.places = places;
+        this.listener = listener;
     }
 
     public void update(List<PlaceDto> newPlaces) {
@@ -41,6 +48,7 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
     @Override
     public int getItemViewType(int position) {
         String category = places.get(position).getPlaceCategory();
+        if ("HEADER".equals(category)) return TYPE_HEADER;
         if (category == null) return TYPE_DEFAULT;
 
         switch (category) {
@@ -62,6 +70,9 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         int layoutId;
         switch (viewType) {
+            case TYPE_HEADER:
+                layoutId = R.layout.item_travel_place_header;
+                break;
             case TYPE_FOOD:
                 layoutId = R.layout.item_travel_place_food;
                 break;
@@ -88,6 +99,10 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
         PlaceDto place = places.get(position);
         holder.tvPlaceName.setText(place.getPlaceName());
 
+        if (getItemViewType(position) == TYPE_HEADER) {
+            return; // Headers only have tvPlaceName
+        }
+
         String info = "다음 장소까지: " + place.getTravelTimeMinutesToNext() + "분 (" + place.getTransportMode() + ")";
         holder.tvTravelInfo.setText(info);
         
@@ -99,28 +114,53 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
         }
 
         // 초기화
-        holder.layoutWebview.setVisibility(View.GONE);
+        if (holder.layoutWebview != null) {
+            holder.layoutWebview.setVisibility(View.GONE);
+        }
+
+        // Add Visit button dynamically
+        if (holder.layoutHeader != null) {
+            android.widget.Button btnVisit = holder.itemView.findViewWithTag("btnVisit");
+            if (btnVisit == null) {
+                btnVisit = new android.widget.Button(holder.itemView.getContext());
+                btnVisit.setTag("btnVisit");
+                btnVisit.setText("✅ 방문");
+                btnVisit.setTextSize(12);
+                btnVisit.setPadding(8, 0, 8, 0);
+                android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.setMargins(16, 0, 0, 0);
+                holder.layoutHeader.addView(btnVisit, params);
+            }
+            btnVisit.setOnClickListener(v -> {
+                if (listener != null) listener.onVisitComplete(place);
+            });
+        }
 
         // 카드 전체 클릭 이벤트
         holder.itemView.setOnClickListener(v -> {
-            if (holder.layoutWebview.getVisibility() == View.GONE) {
-                holder.layoutWebview.setVisibility(View.VISIBLE);
-                String url = place.getPlaceUrl();
-                if (url != null && !url.isEmpty()) {
-                    WebSettings webSettings = holder.webView.getSettings();
-                    webSettings.setJavaScriptEnabled(true);
-                    holder.webView.setWebViewClient(new WebViewClient());
-                    holder.webView.loadUrl(url);
+            if (holder.layoutWebview != null) {
+                if (holder.layoutWebview.getVisibility() == View.GONE) {
+                    holder.layoutWebview.setVisibility(View.VISIBLE);
+                    String url = place.getPlaceUrl();
+                    if (url != null && !url.isEmpty() && holder.webView != null) {
+                        WebSettings webSettings = holder.webView.getSettings();
+                        webSettings.setJavaScriptEnabled(true);
+                        holder.webView.setWebViewClient(new WebViewClient());
+                        holder.webView.loadUrl(url);
+                    }
+                } else {
+                    holder.layoutWebview.setVisibility(View.GONE);
                 }
-            } else {
-                holder.layoutWebview.setVisibility(View.GONE);
             }
         });
 
         // 닫기 버튼 클릭 이벤트
-        holder.btnClose.setOnClickListener(v -> {
-            holder.layoutWebview.setVisibility(View.GONE);
-        });
+        if (holder.btnClose != null) {
+            holder.btnClose.setOnClickListener(v -> {
+                holder.layoutWebview.setVisibility(View.GONE);
+            });
+        }
     }
 
     @Override
@@ -133,6 +173,7 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
         FrameLayout layoutWebview;
         WebView webView;
         ImageButton btnClose;
+        android.widget.LinearLayout layoutHeader;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -143,6 +184,7 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
             layoutWebview = itemView.findViewById(R.id.layout_webview);
             webView = itemView.findViewById(R.id.webview);
             btnClose = itemView.findViewById(R.id.btn_close_webview);
+            layoutHeader = itemView.findViewById(R.id.layout_header);
         }
     }
 }

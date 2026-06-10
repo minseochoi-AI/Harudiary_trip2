@@ -176,39 +176,7 @@
 
         </LinearLayout>
 
-        <!-- ★ 추천된 여행 일정 (제미나이 AI) -->
-        <LinearLayout
-            android:id="@+id/section_travel_plan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:orientation="vertical"
-            android:visibility="gone">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="✨ 추천된 여행 일정"
-                android:textColor="@color/primary"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_travel_plan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
-
-            <Button
-                android:id="@+id/btn_save_plan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="일정 확정 및 저장"
-                android:backgroundTint="@color/primary"
-                android:textColor="@android:color/white" />
-        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

@@ -27,16 +27,7 @@ import java.util.List;
 
 import android.widget.Button;
 import android.widget.Toast;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.ItemTouchHelper;
-
-import com.example.harudiary.adapter.TravelPlanAdapter;
-import com.example.harudiary.model.TravelPlanResponse;
-import com.example.harudiary.model.DayPlanDto;
-import com.example.harudiary.model.PlaceDto;
 import com.example.harudiary.api.RetrofitClient;
-import com.example.harudiary.api.TravelApi;
 import com.example.harudiary.api.DiaryApi;
 
 import retrofit2.Call;
@@ -59,12 +50,6 @@ public class DailyTimelineFragment extends Fragment {
     private LinearLayout flMorning, flLunch, flEvening, flOther;
     private View sectionOther;
     
-    // Travel Plan Components
-    private LinearLayout sectionTravelPlan;
-    private RecyclerView rvTravelPlan;
-    private Button btnSavePlan;
-    private TravelPlanAdapter travelPlanAdapter;
-    private List<PlaceDto> currentTravelPlanPlaces;
 
     public static DailyTimelineFragment newInstance(String date) {
         DailyTimelineFragment f = new DailyTimelineFragment();
@@ -96,10 +81,6 @@ public class DailyTimelineFragment extends Fragment {
         flOther       = view.findViewById(R.id.fl_other);
         sectionOther  = view.findViewById(R.id.section_other);
 
-        sectionTravelPlan = view.findViewById(R.id.section_travel_plan);
-        rvTravelPlan      = view.findViewById(R.id.rv_travel_plan);
-        btnSavePlan       = view.findViewById(R.id.btn_save_plan);
-        rvTravelPlan.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         loadAndBind();
         return view;
@@ -387,80 +368,4 @@ public class DailyTimelineFragment extends Fragment {
         return "기타";
     }
 
-    // ── 여행 플랜 로직 ─────────────────────────────────────────────
-    
-    public void showTravelPlan(TravelPlanResponse planResponse) {
-        if (planResponse == null || planResponse.getDays() == null) return;
-        
-        sectionTravelPlan.setVisibility(View.VISIBLE);
-        currentTravelPlanPlaces = new ArrayList<>();
-        
-        for (DayPlanDto day : planResponse.getDays()) {
-            if (day.getPlaces() != null) {
-                currentTravelPlanPlaces.addAll(day.getPlaces());
-            }
-        }
-        
-        travelPlanAdapter = new TravelPlanAdapter(currentTravelPlanPlaces);
-        rvTravelPlan.setAdapter(travelPlanAdapter);
-        
-        // ItemTouchHelper (Drag and Drop & Swipe to Delete)
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
-                ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                int fromPos = viewHolder.getAdapterPosition();
-                int toPos = target.getAdapterPosition();
-                Collections.swap(currentTravelPlanPlaces, fromPos, toPos);
-                travelPlanAdapter.notifyItemMoved(fromPos, toPos);
-                return true;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
-                currentTravelPlanPlaces.remove(position);
-                travelPlanAdapter.notifyItemRemoved(position);
-            }
-        });
-        itemTouchHelper.attachToRecyclerView(rvTravelPlan);
-        
-        btnSavePlan.setOnClickListener(v -> saveTravelPlan(planResponse));
-        
-        // 스크롤 맨 아래로 이동
-        View parent = (View) sectionTravelPlan.getParent();
-        if (parent instanceof LinearLayout && parent.getParent() instanceof android.widget.ScrollView) {
-            android.widget.ScrollView sv = (android.widget.ScrollView) parent.getParent();
-            sv.post(() -> sv.fullScroll(View.FOCUS_DOWN));
-        }
-    }
-    
-    private void saveTravelPlan(TravelPlanResponse response) {
-        response.setDays(null); // Flat list이므로 무시 (기존 로직이 DayPlan을 사용한다면 백엔드 수정 필요. 현재는 placeDto를 넘긴다고 가정)
-        // 백엔드 API (api/travel/plan/save)는 TravelPlanResponse 구조를 받지만, 
-        // 현재 Harudiary 프론트엔드는 Days가 아닌 단일 PlaceDto 리스트를 요구하거나 Day 1개로 감싸야 함.
-        DayPlanDto dayDto = new DayPlanDto();
-        dayDto.setPlaces(currentTravelPlanPlaces);
-        List<DayPlanDto> days = new ArrayList<>();
-        days.add(dayDto);
-        response.setDays(days);
-        
-        TravelApi api = RetrofitClient.getClient().create(TravelApi.class);
-        api.savePlan(response, String.valueOf(userId), null).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> responseObj) {
-                if (responseObj.isSuccessful()) {
-                    if (isAdded()) Toast.makeText(requireContext(), "일정이 성공적으로 저장되었습니다.", Toast.LENGTH_SHORT).show();
-                    sectionTravelPlan.setVisibility(View.GONE);
-                } else {
-                    if (isAdded()) Toast.makeText(requireContext(), "일정 저장 실패", Toast.LENGTH_SHORT).show();
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                if (isAdded()) Toast.makeText(requireContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 }

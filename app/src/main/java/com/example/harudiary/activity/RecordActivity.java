@@ -43,6 +43,11 @@ public class RecordActivity extends AppCompatActivity {
 
     public static final String EXTRA_DATE = "extra_date";
     public static final String EXTRA_SLOT = "extra_slot";
+    public static final String EXTRA_MODE = "extra_mode";
+    public static final String EXTRA_PREFILL_CONTENT = "extra_prefill_content";
+    public static final String EXTRA_PREFILL_ADDRESS = "extra_prefill_address";
+    public static final String EXTRA_PREFILL_LAT = "extra_prefill_lat";
+    public static final String EXTRA_PREFILL_LNG = "extra_prefill_lng";
 
     private static final int REQ_PHOTO    = 1001;
     private static final int REQ_LOCATION = 1002;
@@ -125,6 +130,26 @@ public class RecordActivity extends AppCompatActivity {
         // ★ EXTRA_SLOT이 명시적으로 전달된 경우에만 시간대 선택, 아니면 null(미선택) 상태 유지
         String extraSlot = getIntent().getStringExtra(EXTRA_SLOT);
         selectedSlot = (extraSlot != null && !extraSlot.isEmpty()) ? extraSlot : null;
+
+        String prefillContent = getIntent().getStringExtra(EXTRA_PREFILL_CONTENT);
+        if (prefillContent != null) etContent.setText(prefillContent);
+        
+        String prefillAddress = getIntent().getStringExtra(EXTRA_PREFILL_ADDRESS);
+        if (prefillAddress != null) {
+            currentAddress = prefillAddress;
+            tvLocation.setText("📍 " + prefillAddress);
+        }
+        
+        currentLat = getIntent().getDoubleExtra(EXTRA_PREFILL_LAT, 0);
+        currentLng = getIntent().getDoubleExtra(EXTRA_PREFILL_LNG, 0);
+        
+        String mode = getIntent().getStringExtra(EXTRA_MODE);
+        if ("plan".equals(mode)) {
+            findViewById(R.id.btn_save).setVisibility(android.view.View.GONE);
+            btnGenerateTravelPlan.setText("✈️ AI 여행 일정 생성");
+            btnGenerateTravelPlan.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF9800")));
+            etContent.setHint("어디로 가고 싶나요? 지역명을 포함해 작성하면 더 정확한 추천을 받을 수 있어요 ✈️\n예) 제주도에서 흑돼지 먹고 바다 산책하고 싶다");
+        }
     }
 
     private void setAutoDatetime() {
@@ -227,8 +252,14 @@ public class RecordActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull retrofit2.Response<com.example.harudiary.model.TravelPlanResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    runOnUiThread(() -> Toast.makeText(RecordActivity.this, "일정 생성 완료! " + response.body().getTripTitle(), Toast.LENGTH_LONG).show());
-                    // 추가적으로 결과를 보여주는 액티비티 띄우기 등의 로직을 연동할 수 있습니다.
+                    if (response.body().getDays() == null || response.body().getDays().isEmpty() || "지역을 알 수 없습니다".equals(response.body().getTripTitle())) {
+                        runOnUiThread(() -> Toast.makeText(RecordActivity.this, "지역명을 포함해서 다시 작성해 주세요", Toast.LENGTH_LONG).show());
+                        return;
+                    }
+                    Intent intent = new Intent(RecordActivity.this, TravelPlanActivity.class);
+                    intent.putExtra("plan", response.body());
+                    intent.putExtra("date", selectedDate);
+                    startActivity(intent);
                 } else {
                     runOnUiThread(() -> Toast.makeText(RecordActivity.this, "일정 생성 실패", Toast.LENGTH_SHORT).show());
                 }
@@ -295,6 +326,10 @@ public class RecordActivity extends AppCompatActivity {
     }
 
     private void requestLocationAndFetchData() {
+        String mode = getIntent().getStringExtra(EXTRA_MODE);
+        if ("plan".equals(mode) || (currentLat != 0 && currentLng != 0)) {
+            return;
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,

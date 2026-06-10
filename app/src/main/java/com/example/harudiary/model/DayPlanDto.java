@@ -1,9 +1,11 @@
 package com.example.harudiary.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 import java.util.List;
 
-public class DayPlanDto {
+public class DayPlanDto implements Serializable {
+    private static final long serialVersionUID = 1L;
     @SerializedName("day_number")
     private int dayNumber;
 
