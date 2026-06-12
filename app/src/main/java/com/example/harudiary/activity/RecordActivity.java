@@ -61,15 +61,12 @@ public class RecordActivity extends AppCompatActivity {
     private String currentWeather = "";
     private float  currentTemperature = 0f;
 
-    private TextView tvAutoDatetime, tvAutoWeather, tvLocation, tvEndDate;
+    private TextView tvAutoDatetime, tvAutoWeather, tvLocation;
     private ImageView ivPhoto;
     private android.widget.EditText etContent;
     private android.view.View layoutPhotoContainer;
     private android.widget.ImageButton btnRemovePhoto;
     private com.google.android.material.button.MaterialButton btnAddPhoto;
-    private android.widget.Button btnGenerateTravelPlan, btnSelectEndDate;
-
-    private int calculatedDays = 1; // 기본 1일 (당일치기)
 
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -92,17 +89,11 @@ public class RecordActivity extends AppCompatActivity {
         tvAutoDatetime = findViewById(R.id.tv_auto_datetime);
         tvAutoWeather  = findViewById(R.id.tv_auto_weather);
         tvLocation     = findViewById(R.id.tv_location);
-        tvEndDate      = findViewById(R.id.tv_end_date);
         ivPhoto        = findViewById(R.id.iv_photo);
         etContent      = findViewById(R.id.et_content);
         layoutPhotoContainer = findViewById(R.id.layout_photo_container);
         btnRemovePhoto = findViewById(R.id.btn_remove_photo);
         btnAddPhoto    = findViewById(R.id.btn_add_photo);
-        btnGenerateTravelPlan = findViewById(R.id.btn_generate_travel_plan);
-        btnSelectEndDate      = findViewById(R.id.btn_select_end_date);
-
-        btnGenerateTravelPlan.setOnClickListener(v -> generateTravelPlan());
-        btnSelectEndDate.setOnClickListener(v -> showDatePickerDialog());
     }
 
     private void applyIntentExtras() {
@@ -127,14 +118,6 @@ public class RecordActivity extends AppCompatActivity {
         
         currentLat = getIntent().getDoubleExtra(EXTRA_PREFILL_LAT, 0);
         currentLng = getIntent().getDoubleExtra(EXTRA_PREFILL_LNG, 0);
-        
-        String mode = getIntent().getStringExtra(EXTRA_MODE);
-        if ("plan".equals(mode)) {
-            findViewById(R.id.btn_save).setVisibility(android.view.View.GONE);
-            btnGenerateTravelPlan.setText("✈️ AI 여행 일정 생성");
-            btnGenerateTravelPlan.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF9800")));
-            etContent.setHint("어디로 가고 싶나요? 지역명을 포함해 작성하면 더 정확한 추천을 받을 수 있어요 ✈️\n예) 제주도에서 흑돼지 먹고 바다 산책하고 싶다");
-        }
     }
 
     private void setAutoDatetime() {
@@ -163,76 +146,6 @@ public class RecordActivity extends AppCompatActivity {
         findViewById(R.id.btn_save).setOnClickListener(v -> saveRecord());
     }
 
-    private void showDatePickerDialog() {
-        if (selectedDate == null) return;
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
-            sdf.setTimeZone(KST);
-            Date start = sdf.parse(selectedDate);
-            Calendar cal = Calendar.getInstance(KST);
-            if (start != null) cal.setTime(start);
-
-            DatePickerDialog dialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
-                Calendar endCal = Calendar.getInstance(KST);
-                endCal.set(year, month, dayOfMonth);
-                
-                try {
-                    Date startObj = sdf.parse(selectedDate);
-                    Date endObj = endCal.getTime();
-                    
-                    if (endObj.before(startObj)) {
-                        Toast.makeText(this, "종료일은 시작일 이후여야 합니다.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    
-                    long diffInMillis = endObj.getTime() - startObj.getTime();
-                    calculatedDays = (int) (diffInMillis / (1000 * 60 * 60 * 24)) + 1;
-                    
-                    String endDateStr = sdf.format(endObj);
-                    tvEndDate.setText(String.format(Locale.KOREA, "%s (%d박 %d일)", endDateStr, calculatedDays - 1, calculatedDays));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
-            dialog.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void generateTravelPlan() {
-        String content = etContent.getText().toString().trim();
-        if (content.isEmpty()) {
-            Toast.makeText(this, "활동 내용을 먼저 입력해주세요", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Toast.makeText(this, calculatedDays + "일 여행 일정 생성 중...", Toast.LENGTH_SHORT).show();
-
-        TravelApi api = RetrofitClient.getClient().create(TravelApi.class);
-        TravelApi.DiaryRecommendRequest req = new TravelApi.DiaryRecommendRequest(selectedDate, calculatedDays, currentLat, currentLng, content);
-        
-        api.recommendByDiary(req).enqueue(new retrofit2.Callback<com.example.harudiary.model.TravelPlanResponse>() {
-            @Override
-            public void onResponse(@NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull retrofit2.Response<com.example.harudiary.model.TravelPlanResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    if (response.body().getDays() == null || response.body().getDays().isEmpty() || "지역을 알 수 없습니다".equals(response.body().getTripTitle())) {
-                        runOnUiThread(() -> Toast.makeText(RecordActivity.this, "지역명을 포함해서 다시 작성해 주세요", Toast.LENGTH_LONG).show());
-                        return;
-                    }
-                    Intent intent = new Intent(RecordActivity.this, TravelPlanActivity.class);
-                    intent.putExtra("plan", response.body());
-                    intent.putExtra("date", selectedDate);
-                    startActivity(intent);
-                } else {
-                    runOnUiThread(() -> Toast.makeText(RecordActivity.this, "일정 생성 실패", Toast.LENGTH_SHORT).show());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull Throwable t) {
-                runOnUiThread(() -> Toast.makeText(RecordActivity.this, "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show());
-            }
         });
     }
 
@@ -292,8 +205,7 @@ public class RecordActivity extends AppCompatActivity {
     }
 
     private void requestLocationAndFetchData() {
-        String mode = getIntent().getStringExtra(EXTRA_MODE);
-        if ("plan".equals(mode) || (currentLat != 0 && currentLng != 0)) {
+        if (currentLat != 0 && currentLng != 0) {
             return;
         }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
