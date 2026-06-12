@@ -102,33 +102,50 @@ public class TravelFlowE2EInstrumentedTest {
     }
 
     private void testSavePlanDuplicateUpdate(JSONObject planResp) throws Exception {
+        String testDate = "2026-06-20";
         // 첫 번째 저장 (date: 2026-06-20)
-        String url = "/travel/plan/save?userId=test_user_flow&date=2026-06-20";
+        String url = "/travel/plan/save?userId=test_user_flow&date=" + testDate;
         postRequest(url, planResp);
 
+        // 동일 날짜에 실제 기록(Record: isPlan=false) 저장 (Double Storage 모사)
+        JSONObject recordPayload = new JSONObject();
+        recordPayload.put("userId", "test_user_flow");
+        recordPayload.put("date", testDate);
+        recordPayload.put("timeSlot", "evening");
+        recordPayload.put("content", "도쿄 도착해서 숙소 체크인 완료!");
+        recordPayload.put("rating", 4.0);
+        postRequest("/diary", recordPayload);
+
         // 두 번째 저장 (date: 2026-06-20, 제목 변경 모사하여 덮어쓰기 검증)
+        // 이때 기록(isPlan=false)이 있어도 충돌 없이 계획(isPlan=true)만 수정되어야 함
         planResp.put("trip_title", "업데이트된 도쿄 여행 일정");
         postRequest(url, planResp);
 
-        // GET /diary/test_user_flow 를 호출해서 날짜 2026-06-20가 1개만 있는지, 
-        // 제목이 업데이트된 내용인지 검증
+        // GET /diary/test_user_flow 를 호출해서 날짜 2026-06-20가 2개인지, 
+        // 계획 제목이 업데이트된 내용인지 검증
         String readResp = getRequest("/diary/test_user_flow");
         JSONArray diaries = new JSONArray(readResp);
         
         int count = 0;
         boolean titleUpdated = false;
+        boolean hasRecord = false;
         for (int i = 0; i < diaries.length(); i++) {
             JSONObject d = diaries.getJSONObject(i);
-            if ("2026-06-20".equals(d.optString("date"))) {
+            if (testDate.equals(d.optString("date"))) {
                 count++;
-                if ("업데이트된 도쿄 여행 일정".equals(d.optString("title"))) {
-                    titleUpdated = true;
+                if (d.optBoolean("isPlan", false)) {
+                    if ("업데이트된 도쿄 여행 일정".equals(d.optString("title"))) {
+                        titleUpdated = true;
+                    }
+                } else {
+                    hasRecord = true;
                 }
             }
         }
         
-        assertEquals("동일 날짜 데이터는 중복 생성되지 않고 1개여야 합니다.", 1, count);
-        assertTrue("기존 데이터가 새로운 계획으로 덮어씌워져야(Update) 합니다.", titleUpdated);
+        assertEquals("동일 날짜에 계획 1개, 기록 1개로 총 2개가 공존해야 합니다.", 2, count);
+        assertTrue("기존 계획 데이터가 새로운 계획으로 덮어씌워져야(Update) 합니다.", titleUpdated);
+        assertTrue("실제 일기(Record) 데이터도 정상 보존되어야 합니다.", hasRecord);
     }
 
     private void testTravelCompletionRecord() throws Exception {

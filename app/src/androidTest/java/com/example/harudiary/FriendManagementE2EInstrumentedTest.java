@@ -147,11 +147,38 @@ public class FriendManagementE2EInstrumentedTest {
         }
         assertTrue("목록에 친구 C가 있어야 합니다.", hasC);
 
+        // 친구 C가 기록과 계획을 작성
+        JSONObject diaryC = new JSONObject();
+        diaryC.put("userId", USER_C);
+        diaryC.put("date", "2026-06-25");
+        diaryC.put("timeSlot", "morning");
+        diaryC.put("content", "친구 달력 테스트 일기");
+        diaryC.put("rating", 4.0);
+        postRequest("/diary", diaryC);
+        
+        JSONObject planC = new JSONObject();
+        planC.put("tripTitle", "친구 달력 계획");
+        planC.put("days", new JSONArray());
+        postRequest("/travel/plan/save?userId=" + USER_C + "&date=2026-06-26", planC);
+
         // GET /api/friend/dates/{friendId}
         String datesResp = getRequest("/friend/dates/" + USER_C);
         JSONArray datesArr = new JSONArray(datesResp);
-        // 에러 없이 빈 배열이라도 떨어지면 통과
-        assertTrue("친구 다이어리 날짜 목록이 반환되어야 합니다.", datesArr != null);
+        org.junit.Assert.assertEquals("친구의 달력 날짜 목록이 2개(계획 1, 기록 1)여야 합니다.", 2, datesArr.length());
+
+        boolean foundRecord = false;
+        boolean foundPlan = false;
+        for (int i=0; i<datesArr.length(); i++) {
+            JSONObject obj = datesArr.getJSONObject(i);
+            org.junit.Assert.assertTrue("날짜 응답에 isPlan 필드가 존재해야 합니다.", obj.has("isPlan"));
+            if (!obj.getBoolean("isPlan") && "2026-06-25".equals(obj.getString("date"))) {
+                foundRecord = true;
+            } else if (obj.getBoolean("isPlan") && "2026-06-26".equals(obj.getString("date"))) {
+                foundPlan = true;
+            }
+        }
+        org.junit.Assert.assertTrue("달력 마커 응답에 Record 객체가 올바르게 포함되어야 합니다.", foundRecord);
+        org.junit.Assert.assertTrue("달력 마커 응답에 Plan 객체가 올바르게 포함되어야 합니다.", foundPlan);
 
         // DELETE /api/friend/delete
         deleteRequest("/friend/delete?userId=" + USER_A + "&friendId=" + USER_C);

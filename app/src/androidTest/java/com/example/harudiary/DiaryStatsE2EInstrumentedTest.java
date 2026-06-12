@@ -34,10 +34,11 @@ public class DiaryStatsE2EInstrumentedTest {
     private static final String BASE_URL = "http://133.186.143.108:8083/api";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private OkHttpClient client;
-    private final String TEST_USER = "test_stats_user";
+    private String TEST_USER;
 
     @Before
     public void setUp() {
+        TEST_USER = "test_stats_" + System.currentTimeMillis();
         client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
@@ -61,7 +62,7 @@ public class DiaryStatsE2EInstrumentedTest {
             reg.put("nickname", "StatsUser");
             postRequest("/user/register", reg);
             
-            // 테스트용 일기 하나 작성
+            // 테스트용 일기(Record, isPlan=false) 하나 작성
             JSONObject diary = new JSONObject();
             diary.put("userId", TEST_USER);
             diary.put("date", "2026-06-25");
@@ -69,6 +70,14 @@ public class DiaryStatsE2EInstrumentedTest {
             diary.put("content", "통계 테스트용 일기");
             diary.put("rating", 4.0);
             postRequest("/diary", diary);
+
+            // 계획(Plan, isPlan=true) 하나 작성 - 이것이 통계에 영향을 주지 않아야 함
+            JSONObject travelPlan = new JSONObject();
+            travelPlan.put("tripTitle", "통계 오염 테스트 여행");
+            travelPlan.put("days", new JSONArray()); // 빈 일정
+            
+            // TravelPlan 저장 API 호출 (date=2026-06-26)
+            postRequest("/travel/plan/save?userId=" + TEST_USER + "&date=2026-06-26", travelPlan);
         } catch (Exception ignored) {}
     }
 
@@ -82,13 +91,13 @@ public class DiaryStatsE2EInstrumentedTest {
         String resp = getRequest("/diary/" + TEST_USER + "/count");
         // count는 정수값이 반환되어야 함
         int count = Integer.parseInt(resp.trim());
-        assertTrue("다이어리 개수가 1개 이상이어야 합니다.", count >= 1);
+        org.junit.Assert.assertEquals("다이어리 개수가 1개여야 합니다. (계획은 제외되어야 함)", 1, count);
     }
 
     private void testDiaryStreak() throws Exception {
         String resp = getRequest("/diary/" + TEST_USER + "/streak");
         int streak = Integer.parseInt(resp.trim());
-        assertTrue("다이어리 연속 작성일이 0 이상이어야 합니다.", streak >= 0);
+        org.junit.Assert.assertEquals("연속 작성일이 1이어야 합니다. (계획은 제외)", 1, streak);
     }
 
     private void testDiaryByDate() throws Exception {
