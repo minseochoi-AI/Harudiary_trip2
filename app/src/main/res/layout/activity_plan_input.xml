@@ -58,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="어디로 떠나시나요? ✈️"
-                android:textSize="22sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#37352F"
                 android:layout_marginBottom="16dp" />
@@ -69,11 +69,19 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_rounded_white"
                 android:padding="16dp"
-                android:hint="예) 제주도, 오사카, 부산 해운대"
+                android:hint="예) 제주도, 부산 해운대, 강릉"
                 android:textSize="16sp"
                 android:textColor="#37352F"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="8dp"
                 android:elevation="2dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠️ 현재 카카오 API 제약으로 국내 여행지만 AI 일정을 생성할 수 있습니다."
+                android:textSize="12sp"
+                android:textColor="#F44336"
+                android:layout_marginBottom="24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
