@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.harudiary.R;
 
 import java.util.Calendar;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * CalendarAdapter — 월별/주간 캘린더 그리드 어댑터
@@ -24,7 +24,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
     private static final String[] HEADERS = {"일", "월", "화", "수", "목", "금", "토"};
 
     private int year, month, selectedDay, todayDay;
-    private Set<String> recordDates;
+    private Map<String, Boolean> recordDates;
     private int firstDayOffset, daysInMonth;
 
     // ★ 주간 모드
@@ -35,13 +35,13 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
     private final OnDayClickListener listener;
 
     public CalendarAdapter(int year, int month, int selectedDay, int todayDay,
-                           Set<String> recordDates, OnDayClickListener listener) {
+                           Map<String, Boolean> recordDates, OnDayClickListener listener) {
         this.listener = listener;
         updateMonth(year, month, selectedDay, todayDay, recordDates);
     }
 
     public void updateMonth(int year, int month, int selectedDay, int todayDay,
-                            Set<String> recordDates) {
+                            Map<String, Boolean> recordDates) {
         this.year = year; this.month = month;
         this.selectedDay = selectedDay; this.todayDay = todayDay;
         this.recordDates = recordDates;
@@ -77,7 +77,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
 
     public boolean isWeekMode() { return weekMode; }
 
-    public void setRecordDates(Set<String> dates) {
+    public void setRecordDates(Map<String, Boolean> dates) {
         this.recordDates = dates;
         notifyDataSetChanged();
     }
@@ -144,8 +144,16 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
             vh.tvDay.setTextColor(dayColor(vh, col));
         }
 
-        boolean hasDot = recordDates != null && recordDates.contains(dateStr);
+        boolean hasDot = recordDates != null && recordDates.containsKey(dateStr);
         vh.vDot.setVisibility(hasDot ? View.VISIBLE : View.INVISIBLE);
+        if (hasDot) {
+            Boolean isPlan = recordDates.get(dateStr);
+            if (Boolean.TRUE.equals(isPlan)) {
+                vh.vDot.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFA726"))); // 주황색
+            } else {
+                vh.vDot.setBackgroundTintList(null); // 기본 테마색 (record)
+            }
+        }
 
         vh.itemView.setOnClickListener(v -> { if (listener != null) listener.onDayClick(dateStr); });
     }

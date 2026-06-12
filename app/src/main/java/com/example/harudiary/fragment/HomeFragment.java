@@ -201,24 +201,26 @@ public class HomeFragment extends Fragment {
         int todayInMonth = (currentYear == todayYear && currentMonth == todayMonth) ? todayDay : 0;
 
         DiaryApi diaryApi = RetrofitClient.getClient().create(DiaryApi.class);
-        diaryApi.getRecordDates(userIdStr, yearMonth).enqueue(new Callback<List<String>>() {
+        diaryApi.getRecordDates(userIdStr, yearMonth).enqueue(new Callback<List<com.example.harudiary.model.DiaryDateDto>>() {
             @Override
-            public void onResponse(@NonNull Call<List<String>> call, @NonNull Response<List<String>> response) {
-                Set<String> recordDates = new java.util.HashSet<>();
+            public void onResponse(@NonNull Call<List<com.example.harudiary.model.DiaryDateDto>> call, @NonNull Response<List<com.example.harudiary.model.DiaryDateDto>> response) {
+                java.util.Map<String, Boolean> recordDates = new java.util.HashMap<>();
                 if (response.isSuccessful() && response.body() != null) {
-                    recordDates.addAll(response.body());
+                    for (com.example.harudiary.model.DiaryDateDto dto : response.body()) {
+                        recordDates.put(dto.getDate(), dto.getIsPlan());
+                    }
                 }
                 updateCalendarUI(recordDates, todayInMonth);
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<String>> call, @NonNull Throwable t) {
-                updateCalendarUI(new java.util.HashSet<>(), todayInMonth);
+            public void onFailure(@NonNull Call<List<com.example.harudiary.model.DiaryDateDto>> call, @NonNull Throwable t) {
+                updateCalendarUI(new java.util.HashMap<>(), todayInMonth);
             }
         });
     }
 
-    private void updateCalendarUI(Set<String> recordDates, int todayInMonth) {
+    private void updateCalendarUI(java.util.Map<String, Boolean> recordDates, int todayInMonth) {
         if (!isAdded() || getActivity() == null) return;
         requireActivity().runOnUiThread(() -> {
             if (calendarAdapter == null) {
