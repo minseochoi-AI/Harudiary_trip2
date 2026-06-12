@@ -61,11 +61,12 @@ public class RecordActivity extends AppCompatActivity {
     private String currentWeather = "";
     private float  currentTemperature = 0f;
 
-    private TextView btnMorning, btnLunch, btnEvening;
     private TextView tvAutoDatetime, tvAutoWeather, tvLocation, tvEndDate;
     private ImageView ivPhoto;
     private android.widget.EditText etContent;
-    private RatingBar rbRating;
+    private android.view.View layoutPhotoContainer;
+    private android.widget.ImageButton btnRemovePhoto;
+    private com.google.android.material.button.MaterialButton btnAddPhoto;
     private android.widget.Button btnGenerateTravelPlan, btnSelectEndDate;
 
     private int calculatedDays = 1; // 기본 1일 (당일치기)
@@ -82,42 +83,26 @@ public class RecordActivity extends AppCompatActivity {
         initViews();
         applyIntentExtras();
         setAutoDatetime();
-        setupSlotButtons();
         setupPhotoButton();
         setupSaveClose();
         requestLocationAndFetchData();
     }
 
     private void initViews() {
-        btnMorning     = findViewById(R.id.btn_morning);
-        btnLunch       = findViewById(R.id.btn_lunch);
-        btnEvening     = findViewById(R.id.btn_evening);
         tvAutoDatetime = findViewById(R.id.tv_auto_datetime);
         tvAutoWeather  = findViewById(R.id.tv_auto_weather);
         tvLocation     = findViewById(R.id.tv_location);
         tvEndDate      = findViewById(R.id.tv_end_date);
         ivPhoto        = findViewById(R.id.iv_photo);
         etContent      = findViewById(R.id.et_content);
-        rbRating       = findViewById(R.id.rb_rating);
+        layoutPhotoContainer = findViewById(R.id.layout_photo_container);
+        btnRemovePhoto = findViewById(R.id.btn_remove_photo);
+        btnAddPhoto    = findViewById(R.id.btn_add_photo);
         btnGenerateTravelPlan = findViewById(R.id.btn_generate_travel_plan);
         btnSelectEndDate      = findViewById(R.id.btn_select_end_date);
 
         btnGenerateTravelPlan.setOnClickListener(v -> generateTravelPlan());
         btnSelectEndDate.setOnClickListener(v -> showDatePickerDialog());
-
-        rbRating.setOnTouchListener((v, event) -> {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_MOVE:
-                    v.getParent().requestDisallowInterceptTouchEvent(true);
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    v.getParent().requestDisallowInterceptTouchEvent(false);
-                    break;
-            }
-            return false;
-        });
     }
 
     private void applyIntentExtras() {
@@ -158,39 +143,18 @@ public class RecordActivity extends AppCompatActivity {
         tvAutoDatetime.setText(sdf.format(new Date()));
     }
 
-    private void setupSlotButtons() {
-        updateSlotUI();
-        btnMorning.setOnClickListener(v -> toggleSlot("morning"));
-        btnLunch.setOnClickListener(v -> toggleSlot("lunch"));
-        btnEvening.setOnClickListener(v -> toggleSlot("evening"));
-    }
-
-    /** 같은 슬롯 재클릭 → 해제(null), 다른 슬롯 → 선택 */
-    private void toggleSlot(String slot) {
-        selectedSlot = slot.equals(selectedSlot) ? null : slot;
-        updateSlotUI();
-    }
-
-    private void updateSlotUI() {
-        setSlotSelected(btnMorning, "morning".equals(selectedSlot));
-        setSlotSelected(btnLunch,   "lunch".equals(selectedSlot));
-        setSlotSelected(btnEvening, "evening".equals(selectedSlot));
-    }
-
-    private void setSlotSelected(TextView btn, boolean selected) {
-        if (selected) {
-            btn.setBackgroundResource(R.drawable.bg_time_slot_selected);
-            btn.setTextColor(getColor(R.color.white));
-        } else {
-            btn.setBackgroundResource(R.drawable.bg_time_slot_default);
-            btn.setTextColor(getColor(R.color.gray_label));
-        }
-    }
-
     private void setupPhotoButton() {
-        ivPhoto.setOnClickListener(v -> {
+        android.view.View.OnClickListener pickPhotoListener = v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, REQ_PHOTO);
+        };
+        btnAddPhoto.setOnClickListener(pickPhotoListener);
+        ivPhoto.setOnClickListener(pickPhotoListener);
+        
+        btnRemovePhoto.setOnClickListener(v -> {
+            selectedPhotoUri = null;
+            layoutPhotoContainer.setVisibility(android.view.View.GONE);
+            btnAddPhoto.setVisibility(android.view.View.VISIBLE);
         });
     }
 
@@ -287,7 +251,7 @@ public class RecordActivity extends AppCompatActivity {
         payload.put("timeSlot", selectedSlot);
         payload.put("content", content);
         payload.put("photoUri", selectedPhotoUri);
-        payload.put("rating", rbRating.getRating());
+        payload.put("rating", 0.0f); // 별점 기능 삭제됨
         payload.put("latitude", currentLat);
         payload.put("longitude", currentLng);
         payload.put("address", currentAddress);
@@ -321,6 +285,8 @@ public class RecordActivity extends AppCompatActivity {
             if (uri != null) {
                 selectedPhotoUri = uri.toString();
                 ivPhoto.setImageURI(uri);
+                layoutPhotoContainer.setVisibility(android.view.View.VISIBLE);
+                btnAddPhoto.setVisibility(android.view.View.GONE);
             }
         }
     }

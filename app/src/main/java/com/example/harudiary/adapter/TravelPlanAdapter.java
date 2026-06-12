@@ -132,8 +132,19 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
                 params.setMargins(16, 0, 0, 0);
                 holder.layoutHeader.addView(btnVisit, params);
             }
+            
+            if (place.isVisited()) {
+                btnVisit.setText("✅ 방문 완료");
+                btnVisit.setEnabled(false);
+                btnVisit.setBackgroundColor(android.graphics.Color.LTGRAY);
+            } else {
+                btnVisit.setText("✅ 방문");
+                btnVisit.setEnabled(true);
+                btnVisit.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50")); // Green or default
+            }
+            
             btnVisit.setOnClickListener(v -> {
-                if (listener != null) listener.onVisitComplete(place);
+                if (listener != null && !place.isVisited()) listener.onVisitComplete(place);
             });
         }
 

@@ -14,6 +14,7 @@ public class Record {
     private String weather;
     private float temperature;
     private long timestamp;
+    private boolean isPlan;
 
     public Record() {}
 
@@ -55,4 +56,7 @@ public class Record {
 
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+    public boolean isPlan() { return isPlan; }
+    public void setPlan(boolean plan) { isPlan = plan; }
 }

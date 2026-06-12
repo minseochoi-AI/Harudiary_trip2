@@ -155,7 +155,7 @@
                 android:background="@null"
                 android:gravity="top"
                 android:hint="여기에 추억을 기록하세요..."
-                android:lineSpacingExtra="10dp"
+                android:lineSpacingExtra="6dp"
                 android:textSize="18sp"
                 android:textColor="#37352F"
                 android:textColorHint="#BDBDBD" />

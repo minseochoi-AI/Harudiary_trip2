@@ -210,6 +210,12 @@ public class DailyTimelineFragment extends Fragment {
         // ★ 리액션 바 설정 (친구들이 남긴 하트·댓글)
         setupReactionBar(card, record);
 
+        // ★ 계획 시각적 차별화
+        if (record.isPlan()) {
+            card.findViewById(R.id.tv_plan_badge).setVisibility(View.VISIBLE);
+            card.findViewById(R.id.card_root).setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFF3E0"))); // 주황색 톤
+        }
+
         return card;
     }
 

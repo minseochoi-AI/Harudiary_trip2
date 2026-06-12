@@ -62,4 +62,16 @@ public class PlaceDto implements Serializable {
 
     public int getDayNumber() { return dayNumber; }
     public void setDayNumber(int dayNumber) { this.dayNumber = dayNumber; }
+
+    @SerializedName("id")
+    private Long id;
+    
+    @SerializedName("is_visited")
+    private boolean isVisited;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public boolean isVisited() { return isVisited; }
+    public void setVisited(boolean visited) { isVisited = visited; }
 }

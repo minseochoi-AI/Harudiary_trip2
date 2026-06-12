@@ -167,11 +167,13 @@ public class MainActivity extends AppCompatActivity {
             androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
             String[] options = {"📝 기록 작성", "✈️ 여행 계획"};
             builder.setItems(options, (dialog, which) -> {
-                Intent intent = new Intent(this, RecordActivity.class);
                 if (which == 1) {
-                    intent.putExtra(RecordActivity.EXTRA_MODE, "plan");
+                    // 여행 계획 선택
+                    startActivityForResult(new Intent(this, com.example.harudiary.activity.PlanInputActivity.class), 100);
+                } else {
+                    // 기록 작성 선택
+                    startActivity(new Intent(this, RecordActivity.class));
                 }
-                startActivity(intent);
             });
             builder.show();
         });
@@ -198,5 +200,20 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(RecordActivity.EXTRA_DATE, date);
         intent.putExtra(RecordActivity.EXTRA_SLOT, slot);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            String date = data != null ? data.getStringExtra("date") : null;
+            if (date != null) {
+                navigateToDaily(date);
+            } else {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.KOREA);
+                sdf.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Seoul"));
+                navigateToDaily(sdf.format(new java.util.Date()));
+            }
+        }
     }
 }

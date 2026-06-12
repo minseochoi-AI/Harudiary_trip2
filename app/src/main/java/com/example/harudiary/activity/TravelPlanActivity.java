@@ -38,6 +38,8 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
     private String date;
     private TravelPlanResponse originalResponse;
     private String userId;
+    private PlaceDto lastClickedPlace;
+    private static final int REQ_RECORD = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +171,9 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(TravelPlanActivity.this, "일정이 확정되었습니다.", Toast.LENGTH_SHORT).show();
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("date", date);
+                    setResult(RESULT_OK, resultIntent);
                     finish(); // Return to previous screen
                 } else {
                     Toast.makeText(TravelPlanActivity.this, "저장 실패", Toast.LENGTH_SHORT).show();
@@ -184,6 +189,7 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
 
     @Override
     public void onVisitComplete(PlaceDto place) {
+        lastClickedPlace = place;
         Intent intent = new Intent(this, RecordActivity.class);
         intent.putExtra(RecordActivity.EXTRA_PREFILL_CONTENT, "📍 " + place.getPlaceName() + " 방문");
         intent.putExtra(RecordActivity.EXTRA_PREFILL_ADDRESS, place.getAddressName());
@@ -197,6 +203,33 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
             }
         }
         
-        startActivity(intent);
+        startActivityForResult(intent, REQ_RECORD);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_RECORD && resultCode == RESULT_OK) {
+            if (lastClickedPlace != null) {
+                lastClickedPlace.setVisited(true);
+                adapter.notifyDataSetChanged();
+                savePlanSilently(); // Save updated status to backend
+            }
+        }
+    }
+
+    private void savePlanSilently() {
+        if (originalResponse == null) return;
+        TravelApi api = RetrofitClient.getClient().create(TravelApi.class);
+        api.savePlan(originalResponse, userId, null, date).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                // silently handle
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // silently handle
+            }
+        });
     }
 }
