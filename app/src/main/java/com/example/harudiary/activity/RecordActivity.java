@@ -108,7 +108,15 @@ public class RecordActivity extends AppCompatActivity {
         selectedSlot = (extraSlot != null && !extraSlot.isEmpty()) ? extraSlot : null;
 
         String prefillContent = getIntent().getStringExtra(EXTRA_PREFILL_CONTENT);
-        if (prefillContent != null) etContent.setText(prefillContent);
+        if (prefillContent != null) {
+            etContent.setText(prefillContent);
+            etContent.setHint("이 장소에서 어떤 추억을 남겼나요?");
+            
+            TextView tvTitle = findViewById(R.id.tv_activity_title);
+            if (tvTitle != null) {
+                tvTitle.setText("방문 인증하기");
+            }
+        }
         
         String prefillAddress = getIntent().getStringExtra(EXTRA_PREFILL_ADDRESS);
         if (prefillAddress != null) {
@@ -153,6 +161,11 @@ public class RecordActivity extends AppCompatActivity {
         String content = etContent.getText().toString().trim();
         if (content.isEmpty()) {
             Toast.makeText(this, "활동 내용을 입력해주세요", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (currentLat == 0 && currentLng == 0 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "위치 정보를 로딩 중입니다. 잠시 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
 
