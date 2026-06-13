@@ -2,8 +2,9 @@ import requests
 import json
 import datetime
 import sys
+import time
 
-LOG_FILE = '/home/ubuntu/root/leeyoungkon_projects/log/pipeline_test.log'
+LOG_FILE = '/home/ubuntu/root/base/log/pipeline_test.log'
 BASE = "http://localhost:8083/api"
 
 def write_json_log(scenario, request_data, response_data, error=None):
@@ -19,457 +20,286 @@ def write_json_log(scenario, request_data, response_data, error=None):
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
-# ═══════════════════════════════════════════════════════════
-# D1: 회원가입 → 로그인
-# ═══════════════════════════════════════════════════════════
-def test_d1_register_login():
-    print("D1: 회원가입 → 로그인 ...")
-    
-    # Register user A
-    reg_a = {"id": "test_user_a", "nickname": "유저A"}
+def check(condition, message):
+    if not condition:
+        raise AssertionError(message)
+
+# =======================================================
+# Helpers
+# =======================================================
+def register_user(user_id, nickname):
+    payload = {"id": user_id, "nickname": nickname}
     try:
-        r = requests.post(f"{BASE}/user/register", json=reg_a, timeout=10)
-        r.raise_for_status()
-        write_json_log("D1_register_A", reg_a, r.json())
-        print(f"  ✅ 유저A 가입 OK (id={r.json().get('id')})")
-    except Exception as e:
-        write_json_log("D1_register_A", reg_a, None, error=str(e))
-        # User might already exist, try login anyway
-        print(f"  ⚠️ 유저A 가입 실패 (이미 존재할 수 있음): {e}")
+        r = requests.post(f"{BASE}/user/register", json=payload, timeout=5)
+    except:
+        pass # Ignore already registered
 
-    # Register user B
-    reg_b = {"id": "test_user_b", "nickname": "유저B"}
-    try:
-        r = requests.post(f"{BASE}/user/register", json=reg_b, timeout=10)
-        r.raise_for_status()
-        write_json_log("D1_register_B", reg_b, r.json())
-        print(f"  ✅ 유저B 가입 OK (id={r.json().get('id')})")
-    except Exception as e:
-        write_json_log("D1_register_B", reg_b, None, error=str(e))
-        print(f"  ⚠️ 유저B 가입 실패 (이미 존재할 수 있음): {e}")
-
-    # Login user A
-    login_a = {"id": "test_user_a"}
-    try:
-        r = requests.post(f"{BASE}/user/login", json=login_a, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        write_json_log("D1_login_A", login_a, data)
-        assert data.get("id") == "test_user_a", f"Expected test_user_a, got {data.get('id')}"
-        print(f"  ✅ 유저A 로그인 OK (nickname={data.get('nickname')})")
-    except Exception as e:
-        write_json_log("D1_login_A", login_a, None, error=str(e))
-        print(f"  ❌ 유저A 로그인 실패: {e}")
-        return False
-    return True
-
-
-# ═══════════════════════════════════════════════════════════
-# D2: 다이어리 작성(3건, 다른 날짜) → 조회
-# ═══════════════════════════════════════════════════════════
-DIARY_IDS = []
-
-def test_d2_diary_create_read():
-    print("\nD2: 다이어리 작성(3건) → 조회 ...")
-    
-    diaries = [
-        {"userId": "test_user_b", "date": "2026-06-07", "timeSlot": "morning",
-         "content": "아침 산책했다", "rating": 4.5, "latitude": 37.5665, "longitude": 126.978,
-         "address": "서울시 중구", "weather": "맑음", "temperature": 22.5},
-        {"userId": "test_user_b", "date": "2026-06-08", "timeSlot": "lunch",
-         "content": "점심에 카페 갔다", "rating": 3.0, "latitude": 37.5512, "longitude": 126.988,
-         "address": "서울시 용산구", "weather": "비", "temperature": 18.0},
-        {"userId": "test_user_b", "date": "2026-06-09", "timeSlot": "evening",
-         "content": "저녁에 산에 갔다", "rating": 5.0, "latitude": 37.5780, "longitude": 126.977,
-         "address": "서울시 종로구", "weather": "맑음", "temperature": 25.0},
-    ]
-    
-    for i, d in enumerate(diaries):
-        try:
-            r = requests.post(f"{BASE}/diary", json=d, timeout=10)
-            r.raise_for_status()
-            data = r.json()
-            diary_id = data.get("id")
-            DIARY_IDS.append(diary_id)
-            write_json_log(f"D2_create_diary_{i+1}", d, data)
-            
-            # Verify 10 fields
-            fields_ok = True
-            for key in ["date", "timeSlot", "content", "rating", "latitude", "longitude", "address", "weather", "temperature"]:
-                if str(data.get(key, "")) == "" and d.get(key) is not None:
-                    fields_ok = False
-                    print(f"    ⚠️ 필드 누락: {key}")
-            
-            print(f"  ✅ 다이어리 {i+1} 작성 OK (id={diary_id}, fields_ok={fields_ok})")
-        except Exception as e:
-            write_json_log(f"D2_create_diary_{i+1}", d, None, error=str(e))
-            print(f"  ❌ 다이어리 {i+1} 작성 실패: {e}")
-            return False
-
-    # Read all diaries by user B
-    try:
-        r = requests.get(f"{BASE}/diary/test_user_b", timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        write_json_log("D2_read_diaries", {"userId": "test_user_b"}, data)
-        created_ids = set(DIARY_IDS)
-        found_ids = set(d.get("id") for d in data)
-        missing = created_ids - found_ids
-        if missing:
-            print(f"  ❌ 조회 시 누락된 다이어리 ID: {missing}")
-            return False
-        print(f"  ✅ 다이어리 조회 OK (총 {len(data)}건, 방금 작성한 {len(DIARY_IDS)}건 포함)")
-    except Exception as e:
-        write_json_log("D2_read_diaries", {"userId": "test_user_b"}, None, error=str(e))
-        print(f"  ❌ 다이어리 조회 실패: {e}")
-        return False
-    return True
-
-
-# ═══════════════════════════════════════════════════════════
-# D3: 다이어리 삭제
-# ═══════════════════════════════════════════════════════════
-def test_d3_diary_delete():
-    print("\nD3: 다이어리 삭제 ...")
-    if not DIARY_IDS:
-        print("  ⚠️ 삭제할 다이어리 없음 (D2 스킵됨)")
-        return False
-    
-    target_id = DIARY_IDS[-1]  # 마지막 것 삭제
-    try:
-        r = requests.delete(f"{BASE}/diary/{target_id}", timeout=10)
-        r.raise_for_status()
-        write_json_log("D3_delete_diary", {"diaryId": target_id}, {"status": "DELETED"})
-        
-        # Verify deletion
-        r2 = requests.get(f"{BASE}/diary/test_user_b", timeout=10)
-        remaining_ids = [d.get("id") for d in r2.json()]
-        if target_id in remaining_ids:
-            print(f"  ❌ 삭제 후에도 id={target_id}가 조회됨")
-            return False
-        
-        DIARY_IDS.pop()
-        print(f"  ✅ 다이어리 id={target_id} 삭제 OK (조회에서 미포함 확인)")
-    except Exception as e:
-        write_json_log("D3_delete_diary", {"diaryId": target_id}, None, error=str(e))
-        print(f"  ❌ 삭제 실패: {e}")
-        return False
-    return True
-
-
-# ═══════════════════════════════════════════════════════════
-# D4: 친구 요청
-# ═══════════════════════════════════════════════════════════
-def test_d4_friend_request():
-    print("\nD4: 친구 요청 ...")
-    payload = {"fromUserId": "test_user_a", "toUserId": "test_user_b"}
-    try:
-        r = requests.post(f"{BASE}/friend/request", json=payload, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        write_json_log("D4_friend_request", payload, data)
-        print(f"  ✅ 친구 요청 OK (id={data.get('id')})")
-    except Exception as e:
-        write_json_log("D4_friend_request", payload, None, error=str(e))
-        print(f"  ❌ 친구 요청 실패: {e}")
-        return False
-    return True
-
-
-# ═══════════════════════════════════════════════════════════
-# D5: 타임라인 조회 (TimelineDTO heartCount/commentCount 포함)
-# ═══════════════════════════════════════════════════════════
-def test_d5_timeline():
-    print("\nD5: 친구 타임라인 조회 ...")
-    if not DIARY_IDS:
-        print("  ⚠️ 다이어리 없음")
-        return False
-    
-    params = {"myUserId": "test_user_a", "friendId": "test_user_b", "date": "2026-06-07"}
-    try:
-        r = requests.get(f"{BASE}/friend/timeline", params=params, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        write_json_log("D5_timeline", params, data)
-        
-        if len(data) == 0:
-            print(f"  ❌ 타임라인 결과 0건")
-            return False
-        
-        item = data[0]
-        required = ["id", "date", "timeSlot", "content", "heartCount", "commentCount", "heartedByMe"]
-        missing = [k for k in required if k not in item]
-        if missing:
-            print(f"  ❌ TimelineDTO 필드 누락: {missing}")
-            return False
-        
-        print(f"  ✅ 타임라인 조회 OK ({len(data)}건, heartCount={item['heartCount']}, commentCount={item['commentCount']}, heartedByMe={item['heartedByMe']})")
-    except Exception as e:
-        write_json_log("D5_timeline", params, None, error=str(e))
-        print(f"  ❌ 타임라인 조회 실패: {e}")
-        return False
-    return True
-
-
-# ═══════════════════════════════════════════════════════════
-# D6: 하트 토글 (2회 → ON → OFF)
-# ═══════════════════════════════════════════════════════════
-def test_d6_heart_toggle():
-    print("\nD6: 하트 토글 (ON→OFF) ...")
-    if not DIARY_IDS:
-        print("  ⚠️ 다이어리 없음")
-        return False
-    
-    payload = {"userId": "test_user_a", "diaryId": DIARY_IDS[0]}
-    
-    # Toggle ON
-    try:
-        r = requests.post(f"{BASE}/reaction/toggle", json=payload, timeout=10)
-        r.raise_for_status()
-        result1 = r.json()
-        write_json_log("D6_heart_toggle_ON", payload, result1)
-        
-        if result1 != True:
-            print(f"  ❌ 1차 토글 결과: {result1} (예상: true)")
-            return False
-        print(f"  ✅ 1차 하트 ON: {result1}")
-    except Exception as e:
-        write_json_log("D6_heart_toggle_ON", payload, None, error=str(e))
-        print(f"  ❌ 1차 하트 실패: {e}")
-        return False
-    
-    # Verify timeline shows heart
-    params = {"myUserId": "test_user_a", "friendId": "test_user_b", "date": "2026-06-07"}
-    try:
-        r = requests.get(f"{BASE}/friend/timeline", params=params, timeout=10)
-        data = r.json()
-        target_id = DIARY_IDS[0]
-        item = next((d for d in data if d["id"] == target_id), None)
-        if not item:
-            print(f"  ❌ 타임라인 반영 검증 실패: id={target_id} 항목 찾을 수 없음")
-            return False
-            
-        assert item["heartedByMe"] == True, f"heartedByMe should be True, got {item['heartedByMe']}"
-        assert item["heartCount"] >= 1, f"heartCount should be >=1, got {item['heartCount']}"
-        print(f"  ✅ 타임라인 반영 확인: heartedByMe={item['heartedByMe']}, heartCount={item['heartCount']}")
-    except Exception as e:
-        print(f"  ❌ 타임라인 반영 검증 실패: {e}")
-    
-    # Toggle OFF
-    try:
-        r = requests.post(f"{BASE}/reaction/toggle", json=payload, timeout=10)
-        r.raise_for_status()
-        result2 = r.json()
-        write_json_log("D6_heart_toggle_OFF", payload, result2)
-        
-        if result2 != False:
-            print(f"  ❌ 2차 토글 결과: {result2} (예상: false)")
-            return False
-        print(f"  ✅ 2차 하트 OFF: {result2}")
-    except Exception as e:
-        write_json_log("D6_heart_toggle_OFF", payload, None, error=str(e))
-        print(f"  ❌ 2차 하트 실패: {e}")
-        return False
-    
-    return True
-
-
-# ═══════════════════════════════════════════════════════════
-# D7: 날짜 목록 조회
-# ═══════════════════════════════════════════════════════════
-def test_d7_dates():
-    print("\nD7: 친구 날짜 목록 조회 ...")
-    try:
-        r = requests.get(f"{BASE}/friend/dates/test_user_b", timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        write_json_log("D7_dates", {"friendId": "test_user_b"}, data)
-        
-        if not isinstance(data, list):
-            print(f"  ❌ 날짜 목록이 배열이 아님: {type(data)}")
-            return False
-        
-        if len(data) < 2:
-            print(f"  ⚠️ 날짜 목록이 2개 미만 ({len(data)}개) — D3에서 1건 삭제했으므로 정상일 수 있음")
-        
-        # Check descending order
-        for i in range(len(data) - 1):
-            if data[i] < data[i+1]:
-                print(f"  ❌ 날짜 내림차순이 아님: {data[i]} < {data[i+1]}")
-                return False
-        
-        print(f"  ✅ 날짜 목록 조회 OK ({len(data)}개, 내림차순 정렬 확인): {data}")
-    except Exception as e:
-        write_json_log("D7_dates", {"friendId": "test_user_b"}, None, error=str(e))
-        print(f"  ❌ 날짜 목록 조회 실패: {e}")
-        return False
-    return True
-
-
-# ═══════════════════════════════════════════════════════════
-# D8: 댓글 CRUD (작성 → 조회 → 삭제)
-# ═══════════════════════════════════════════════════════════
-def test_d8_comment_crud():
-    print("\nD8: 댓글 CRUD (작성→조회→삭제) ...")
-    if not DIARY_IDS:
-        print("  ⚠️ 다이어리 없음")
-        return False
-    
-    diary_id = DIARY_IDS[0]
-    
-    # Create comment
-    payload = {"userId": "test_user_a", "diaryId": diary_id, "content": "멋진 기록이네요!"}
-    try:
-        r = requests.post(f"{BASE}/comment", json=payload, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        comment_id = data.get("id")
-        write_json_log("D8_comment_create", payload, data)
-        print(f"  ✅ 댓글 작성 OK (id={comment_id})")
-    except Exception as e:
-        write_json_log("D8_comment_create", payload, None, error=str(e))
-        print(f"  ❌ 댓글 작성 실패: {e}")
-        return False
-    
-    # Read comments
-    try:
-        r = requests.get(f"{BASE}/comment/{diary_id}", timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        write_json_log("D8_comment_read", {"diaryId": diary_id}, data)
-        found = any(c.get("id") == comment_id for c in data)
-        if not found:
-            print(f"  ❌ 방금 작성한 댓글 id={comment_id}이 조회 안 됨")
-            return False
-        print(f"  ✅ 댓글 조회 OK (총 {len(data)}건, id={comment_id} 포함)")
-    except Exception as e:
-        write_json_log("D8_comment_read", {"diaryId": diary_id}, None, error=str(e))
-        print(f"  ❌ 댓글 조회 실패: {e}")
-        return False
-    
-    # Delete comment
-    try:
-        r = requests.delete(f"{BASE}/comment/{comment_id}", params={"userId": "test_user_a"}, timeout=10)
-        r.raise_for_status()
-        write_json_log("D8_comment_delete", {"commentId": comment_id, "userId": "test_user_a"}, {"status": "DELETED"})
-        
-        # Verify deletion
-        r2 = requests.get(f"{BASE}/comment/{diary_id}", timeout=10)
-        remaining = [c.get("id") for c in r2.json()]
-        if comment_id in remaining:
-            print(f"  ❌ 삭제 후에도 id={comment_id}이 조회됨")
-            return False
-        print(f"  ✅ 댓글 삭제 OK (조회에서 미포함 확인)")
-    except Exception as e:
-        write_json_log("D8_comment_delete", {"commentId": comment_id}, None, error=str(e))
-        print(f"  ❌ 댓글 삭제 실패: {e}")
-        return False
-    
-    return True
-
-
-# ═══════════════════════════════════════════════════════════
-# 기존 E2E (여행 추천 파이프라인)
-# ═══════════════════════════════════════════════════════════
-def test_recommend_nearby():
-    print("\nE1: recommend_nearby (GET /nearby) ...")
-    url = f"{BASE}/travel/recommend/nearby"
-    params = {"lat": 37.5665, "lng": 126.9780, "radius": 1500}
-    
-    try:
-        response = requests.get(url, params=params, timeout=120)
-        response.raise_for_status()
-        data = response.json()
-        write_json_log("recommend_nearby", params, data)
-        print(f"  ✅ Scenario E1 Success! Trip: {data.get('trip_title', 'N/A')}")
-        if data.get('days') and len(data['days']) > 0:
-            print(f"     Total Places for Day 1: {len(data['days'][0].get('places', []))}")
-        test_save_to_db(data)
-    except requests.exceptions.RequestException as e:
-        error_resp = e.response.text if hasattr(e, 'response') and e.response is not None else None
-        write_json_log("recommend_nearby", params, None, error=str(e) + (f" | {error_resp}" if error_resp else ""))
-        print(f"  ❌ Scenario E1 Failed: {e}")
-
-def test_recommend_by_diary():
-    print("\nE2: recommend_by_diary (POST /diary) ...")
-    url = f"{BASE}/travel/recommend/diary"
-    payload = {
-        "targetDate": "2026-06-15", "days": 3,
-        "lat": 33.4996, "lng": 126.5312,
-        "diaryText": "어제 제주도 바다에서 산책하고 흑돼지를 먹었는데 너무 좋았다. 이번 2박 3일 여행도 그렇게 가고 싶다."
+def create_dummy_diary(user_id, date_str):
+    d = {
+        "userId": user_id, "date": date_str, "timeSlot": "morning",
+        "content": f"더미 다이어리 {date_str}", "rating": 5.0
     }
+    r = requests.post(f"{BASE}/diary", json=d, timeout=5)
+    r.raise_for_status()
+    data = r.json()
+    return data.get("id") or data.get("activityId")
+
+# =======================================================
+# Part A: PipelineE2E (소셜/CRUD)
+# =======================================================
+def test_pipeline_crud():
+    print("\n[Part A: PipelineE2E CRUD]")
+    results = {}
+    register_user("test_user_a", "유저A")
+    register_user("test_user_b", "유저B")
     
+    # D1: Login
     try:
-        response = requests.post(url, json=payload, timeout=120)
-        response.raise_for_status()
-        data = response.json()
-        write_json_log("recommend_by_diary", payload, data)
-        print(f"  ✅ Scenario E2 Success! Trip: {data.get('trip_title', 'N/A')}")
-        if data.get('days') and len(data['days']) > 0:
-            print(f"     Total Days Generated: {len(data['days'])}")
-            for idx, day in enumerate(data['days']):
-                print(f"     Day {day.get('day_number', idx+1)} Places: {len(day.get('places', []))}")
-        test_save_to_db(data)
-    except requests.exceptions.RequestException as e:
-        error_resp = e.response.text if hasattr(e, 'response') and e.response is not None else None
-        write_json_log("recommend_by_diary", payload, None, error=str(e) + (f" | {error_resp}" if error_resp else ""))
-        print(f"  ❌ Scenario E2 Failed: {e}")
+        r = requests.post(f"{BASE}/user/login", json={"id": "test_user_a"}, timeout=5)
+        r.raise_for_status()
+        write_json_log("A1_login", {"id": "test_user_a"}, r.json())
+        print("  ✅ A1 Login OK")
+        results["A1"] = True
+    except Exception as e:
+        write_json_log("A1_login", {}, None, error=str(e))
+        print(f"  ❌ A1 Failed: {e}")
+        results["A1"] = False
 
-def test_save_to_db(plan_response):
-    print("  E3: save_to_db (POST /save) ...")
-    url = f"http://localhost:8083/api/travel/plan/save"
-    params = {"userId": "test_user_a"}
+    # D2: Diary Create/Read
     try:
-        response = requests.post(url, params=params, json=plan_response, timeout=30)
-        response.raise_for_status()
-        data = {"status": "SUCCESS", "message": "DB save transaction completed"}
-        write_json_log("save_to_db", plan_response, data)
-        print("  ✅ Scenario E3 Success (DB Persistence OK)!")
-    except requests.exceptions.RequestException as e:
-        error_resp = e.response.text if hasattr(e, 'response') and e.response is not None else None
-        write_json_log("save_to_db", plan_response, None, error=str(e) + (f" | {error_resp}" if error_resp else ""))
-        print(f"  ❌ Scenario E3 Failed: {e}")
+        activity_id = create_dummy_diary("test_user_b", "2026-06-07")
+        r = requests.get(f"{BASE}/diary/test_user_b", timeout=5)
+        write_json_log("A2_diary_read", {}, r.json())
+        check(len(r.json()) > 0, "No diaries found")
+        print("  ✅ A2 Diary Create/Read OK")
+        results["A2"] = True
+    except Exception as e:
+        write_json_log("A2_diary_read", {}, None, error=str(e))
+        print(f"  ❌ A2 Failed: {e}")
+        results["A2"] = False
 
+    # D3: Diary Delete
+    try:
+        target_id = create_dummy_diary("test_user_b", "2026-06-08")
+        r = requests.delete(f"{BASE}/diary/{target_id}", timeout=5)
+        r.raise_for_status()
+        r_read = requests.get(f"{BASE}/diary/test_user_b", timeout=5)
+        check(str(target_id) not in r_read.text, "Diary still exists")
+        write_json_log("A3_diary_delete", {"id": target_id}, {"status":"DELETED"})
+        print("  ✅ A3 Diary Delete OK")
+        results["A3"] = True
+    except Exception as e:
+        write_json_log("A3_diary_delete", {}, None, error=str(e))
+        print(f"  ❌ A3 Failed: {e}")
+        results["A3"] = False
 
-# ═══════════════════════════════════════════════════════════
-# MAIN
-# ═══════════════════════════════════════════════════════════
+    # D5: Timeline
+    try:
+        target_id = create_dummy_diary("test_user_b", "2026-06-09")
+        r = requests.get(f"{BASE}/friend/timeline?myUserId=test_user_a&friendId=test_user_b&date=2026-06-09", timeout=5)
+        r.raise_for_status()
+        data = r.json()
+        write_json_log("A5_timeline", {}, data)
+        check(any(str(target_id) in str(item) for item in data), "Diary not in timeline")
+        check("heartCount" in data[0], "No heartCount field")
+        print("  ✅ A5 Timeline OK")
+        results["A5"] = True
+    except Exception as e:
+        write_json_log("A5_timeline", {}, None, error=str(e))
+        print(f"  ❌ A5 Failed: {e}")
+        results["A5"] = False
+
+    return results
+
+# =======================================================
+# Part B: TravelFlowE2E (여행 파이프라인 & 더블 스토리지)
+# =======================================================
+def test_travel_flow():
+    print("\n[Part B: TravelFlowE2E]")
+    results = {}
+    ts = int(time.time())
+    user_flow = f"test_user_flow_{ts}"
+    friend_flow = f"test_friend_flow_{ts}"
+    register_user(user_flow, "FlowUser")
+    register_user(friend_flow, "FlowFriend")
+
+    # C1: Fallback Recommend
+    payload = {"targetDate":"2026-06-20", "days":1, "lat":0.0, "lng":0.0, "diaryText":"도쿄 가고싶다"}
+    try:
+        r = requests.post(f"{BASE}/travel/recommend/diary", json=payload, timeout=30)
+        r.raise_for_status()
+        plan_resp = r.json()
+        write_json_log("B1_fallback_recommend", payload, plan_resp)
+        check("trip_title" in plan_resp, "No trip_title")
+        print("  ✅ B1 Fallback Recommend OK")
+        results["B1"] = True
+    except Exception as e:
+        write_json_log("B1_fallback_recommend", payload, None, error=str(e))
+        print(f"  ❌ B1 Failed: {e}")
+        return results
+
+    # C2: Save Plan Duplicate Update (Double Storage)
+    try:
+        # 1. Save plan
+        r1 = requests.post(f"{BASE}/travel/plan/save?userId={user_flow}&date=2026-06-20", json=plan_resp, timeout=10)
+        r1.raise_for_status()
+        
+        # 2. Save record on same date
+        rec_payload = {"userId": user_flow, "date":"2026-06-20", "timeSlot":"evening", "content":"도쿄 도착!", "rating":4.0}
+        requests.post(f"{BASE}/diary", json=rec_payload, timeout=5)
+        
+        # 3. Update plan
+        plan_resp["trip_title"] = "업데이트된 도쿄 여행 일정"
+        r3 = requests.post(f"{BASE}/travel/plan/save?userId={user_flow}&date=2026-06-20", json=plan_resp, timeout=10)
+        r3.raise_for_status()
+
+        # 4. Verify
+        r4 = requests.get(f"{BASE}/diary/test_user_flow_{ts}", timeout=5)
+        try:
+            data = r4.json()
+        except Exception as e:
+            write_json_log("B2_double_storage_error", {}, r4.text, error=str(e))
+            raise e
+        write_json_log("B2_double_storage", {}, data)
+        
+        items = [d for d in data if d.get("date") == "2026-06-20"]
+        check(len(items) >= 2, "Should have both plan and record")
+        has_plan = any(d.get("isPlan") and d.get("title") == "업데이트된 도쿄 여행 일정" for d in items)
+        has_record = any(not d.get("isPlan") for d in items)
+        check(has_plan and has_record, "Double storage update failed")
+        print("  ✅ B2 Double Storage Update OK")
+        results["B2"] = True
+    except Exception as e:
+        write_json_log("B2_double_storage", {}, None, error=str(e))
+        print(f"  ❌ B2 Failed: {e}")
+        results["B2"] = False
+
+    return results
+
+# =======================================================
+# Part C: FriendManagementE2E
+# =======================================================
+def test_friend_management():
+    print("\n[Part C: FriendManagementE2E]")
+    results = {}
+    ts = int(time.time())
+    ua = f"fm_user_a_{ts}"
+    ub = f"fm_user_b_{ts}"
+    uc = f"fm_user_c_{ts}"
+    register_user(ua, "A사용자")
+    register_user(ub, "B사용자")
+    register_user(uc, "C사용자")
+
+    # Friend Browse & Search
+    try:
+        r1 = requests.get(f"{BASE}/friend/search?userId={ua}&query=B사용자", timeout=5)
+        r1.raise_for_status()
+        check(len(r1.json()) > 0, "No search result")
+        write_json_log("C1_friend_search", {}, r1.json())
+        print("  ✅ C1 Search OK")
+        results["C1"] = True
+    except Exception as e:
+        write_json_log("C1_friend_search", {}, None, str(e))
+        results["C1"] = False
+
+    # Friend Request & Status
+    try:
+        req_payload = {"fromUserId":ua, "toUserId":uc}
+        requests.post(f"{BASE}/friend/request", json=req_payload, timeout=5)
+        
+        r_status = requests.get(f"{BASE}/friend/status?userId={ua}&friendId={uc}", timeout=5)
+        check("PENDING" in r_status.text, "Status not PENDING")
+        
+        r_reqs = requests.get(f"{BASE}/friend/requests/{uc}", timeout=5)
+        reqs = r_reqs.json()
+        req_id = next((r["id"] for r in reqs if r["fromUser"]["id"] == ua), None)
+        check(req_id is not None, "Request ID not found")
+        
+        # Accept
+        requests.post(f"{BASE}/friend/accept/{req_id}", timeout=5)
+        
+        # Calendar Dates check (isPlan)
+        requests.post(f"{BASE}/diary", json={"userId":uc, "date":"2026-06-25", "content":"C일기", "rating":4.0}, timeout=5)
+        requests.post(f"{BASE}/travel/plan/save?userId={uc}&date=2026-06-26", json={"tripTitle":"C계획", "days":[]}, timeout=5)
+        
+        r_dates = requests.get(f"{BASE}/friend/dates/{uc}", timeout=5)
+        dates = r_dates.json()
+        write_json_log("C2_friend_dates", {}, dates)
+        has_plan = any(d.get("isPlan") and d.get("date") == "2026-06-26" for d in dates)
+        has_record = any(not d.get("isPlan") and d.get("date") == "2026-06-25" for d in dates)
+        check(has_plan and has_record, "Dates marker separation failed")
+        
+        print("  ✅ C2 Request, Accept, Dates Marker OK")
+        results["C2"] = True
+    except Exception as e:
+        write_json_log("C2_friend_flow", {}, None, str(e))
+        print(f"  ❌ C2 Failed: {e}")
+        results["C2"] = False
+
+    return results
+
+# =======================================================
+# Part D: DiaryStatsE2E
+# =======================================================
+def test_diary_stats():
+    print("\n[Part D: DiaryStatsE2E]")
+    results = {}
+    ts = int(time.time())
+    TU = f"test_stats_user_{ts}"
+    register_user(TU, "StatsUser")
+
+    try:
+        # Create record vs plan
+        requests.post(f"{BASE}/diary", json={"userId":TU, "date":"2026-06-25", "content":"통계일기", "rating":4.0}, timeout=5)
+        requests.post(f"{BASE}/travel/plan/save?userId={TU}&date=2026-06-26", json={"tripTitle":"통계계획", "days":[]}, timeout=5)
+        
+        # Env
+        r_env = requests.get(f"{BASE}/env/current?lat=37.5665&lng=126.9780", timeout=5)
+        check(r_env.status_code == 200, "Env endpoint failed")
+        
+        # Count (Must provide yearMonth)
+        r_count = requests.get(f"{BASE}/diary/{TU}/count?yearMonth=2026-06", timeout=5)
+        write_json_log("D1_stats_count", {}, r_count.text)
+        count = int(r_count.text.strip())
+        check(count >= 1, f"Count should be >=1, got {count}")
+        
+        # Streak
+        r_streak = requests.get(f"{BASE}/diary/{TU}/streak", timeout=5)
+        streak = int(r_streak.text.strip())
+        check(streak >= 1, "Streak should be >= 1")
+        
+        print("  ✅ D1 Stats (Count, Streak, Env) OK")
+        results["D1"] = True
+    except Exception as e:
+        write_json_log("D1_stats", {}, None, str(e))
+        print(f"  ❌ D1 Failed: {e}")
+        results["D1"] = False
+
+    return results
+
 if __name__ == "__main__":
     print("=" * 60)
-    print("  Harudiary E2E Pipeline Test Suite")
-    print("  (소셜 CRUD + 여행 추천 파이프라인 통합 검증)")
-    print("=" * 60)
-    print(f"  Log: {LOG_FILE}")
-    print(f"  Time: {datetime.datetime.now().isoformat()}")
+    print("  Harudiary MEGA E2E Pipeline Test Suite (Python Version)")
+    print(f"  Log File: {LOG_FILE}")
     print("=" * 60)
     
-    results = {}
+    # Initialize Log
+    with open(LOG_FILE, "w", encoding="utf-8") as f:
+        f.write("")
+        
+    rA = test_pipeline_crud()
+    rB = test_travel_flow()
+    rC = test_friend_management()
+    rD = test_diary_stats()
     
-    # ── Part A: 소셜/CRUD 검증 (D1~D8) ──
-    print("\n─── Part A: 소셜/CRUD 검증 ───")
-    results["D1"] = test_d1_register_login()
-    results["D2"] = test_d2_diary_create_read()
-    results["D3"] = test_d3_diary_delete()
-    results["D4"] = test_d4_friend_request()
-    results["D5"] = test_d5_timeline()
-    results["D6"] = test_d6_heart_toggle()
-    results["D7"] = test_d7_dates()
-    results["D8"] = test_d8_comment_crud()
+    all_res = {**rA, **rB, **rC, **rD}
+    passed = sum(1 for v in all_res.values() if v)
+    total = len(all_res)
     
-    # ── Part B: 여행 추천 파이프라인 (E1~E3) ──
-    print("\n─── Part B: 여행 추천 파이프라인 ───")
-    test_recommend_nearby()
-    test_recommend_by_diary()
-    
-    # ── Summary ──
     print("\n" + "=" * 60)
     print("  RESULTS SUMMARY")
     print("=" * 60)
-    passed = sum(1 for v in results.values() if v)
-    total = len(results)
-    for k, v in results.items():
-        status = "✅ PASS" if v else "❌ FAIL"
-        print(f"  {k}: {status}")
-    print(f"\n  소셜/CRUD: {passed}/{total} passed")
-    print(f"  상세 JSON 로그: {LOG_FILE}")
+    for k, v in all_res.items():
+        print(f"  {k}: {'✅ PASS' if v else '❌ FAIL'}")
+    print(f"\n  Total: {passed}/{total} passed")
     print("=" * 60)

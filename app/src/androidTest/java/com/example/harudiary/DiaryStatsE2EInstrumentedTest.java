@@ -88,7 +88,7 @@ public class DiaryStatsE2EInstrumentedTest {
     }
 
     private void testDiaryCount() throws Exception {
-        String resp = getRequest("/diary/" + TEST_USER + "/count");
+        String resp = getRequest("/diary/" + TEST_USER + "/count?yearMonth=2026-06");
         // count는 정수값이 반환되어야 함
         int count = Integer.parseInt(resp.trim());
         org.junit.Assert.assertEquals("다이어리 개수가 1개여야 합니다. (계획은 제외되어야 함)", 1, count);

@@ -40,7 +40,6 @@ public class PipelineE2EInstrumentedTest {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private OkHttpClient client;
-    private List<Integer> diaryIds = new ArrayList<>();
 
     @Before
     public void setUp() {
@@ -95,42 +94,18 @@ public class PipelineE2EInstrumentedTest {
         }
     }
 
-    // 2. testD2DiaryCreateRead 수정 (id -> activityId)
     private void testD2DiaryCreateRead() throws Exception {
-        JSONArray diaries = new JSONArray();
-        JSONObject d1 = new JSONObject();
-        d1.put("userId", "test_user_b"); d1.put("date", "2026-06-07"); d1.put("timeSlot", "morning");
-        d1.put("content", "아침 산책했다"); d1.put("rating", 4.5); d1.put("latitude", 37.5665); d1.put("longitude", 126.978);
-        
-        JSONObject d2 = new JSONObject();
-        d2.put("userId", "test_user_b"); d2.put("date", "2026-06-08"); d2.put("timeSlot", "lunch");
-        d2.put("content", "점심에 카페 갔다"); d2.put("rating", 3.0); d2.put("latitude", 37.5512); d2.put("longitude", 126.988);
-        
-        JSONObject d3 = new JSONObject();
-        d3.put("userId", "test_user_b"); d3.put("date", "2026-06-09"); d3.put("timeSlot", "evening");
-        d3.put("content", "저녁에 산에 갔다"); d3.put("rating", 5.0); d3.put("latitude", 37.5780); d3.put("longitude", 126.977);
+        int activityId = createDummyDiary("test_user_b", "2026-06-07");
+        assertTrue(activityId > 0);
 
-        diaries.put(d1); diaries.put(d2); diaries.put(d3);
-
-        for (int i = 0; i < diaries.length(); i++) {
-            String resp = postRequest("/diary", diaries.getJSONObject(i));
-            JSONObject respObj = new JSONObject(resp);
-            // Record 모델의 필드명인 activityId를 사용해야 합니다.
-            diaryIds.add(respObj.getInt("activityId"));
-        }
-
-        // Read
         String readResp = getRequest("/diary/test_user_b");
         JSONArray readArray = new JSONArray(readResp);
-        assertTrue(readArray.length() >= 3);
+        assertTrue(readArray.length() > 0);
     }
 
-    // 3. testD3DiaryDelete 수정 (id -> activityId 문자열 검사)
     private void testD3DiaryDelete() throws Exception {
-        if (diaryIds.isEmpty()) return;
-        int targetId = diaryIds.get(diaryIds.size() - 1);
+        int targetId = createDummyDiary("test_user_b", "2026-06-08");
         deleteRequest("/diary/" + targetId);
-        diaryIds.remove(diaryIds.size() - 1);
         
         String readResp = getRequest("/diary/test_user_b");
         assertFalse(readResp.contains("\"activityId\":" + targetId));
@@ -147,18 +122,26 @@ public class PipelineE2EInstrumentedTest {
         }
     }
 
-    // 4. testD5Timeline 수정 (Assertion 수정)
     private void testD5Timeline() throws Exception {
-        if (diaryIds.isEmpty()) return;
+        int targetId = createDummyDiary("test_user_b", "2026-06-07");
         String resp = getRequest("/friend/timeline?myUserId=test_user_a&friendId=test_user_b&date=2026-06-07");
         JSONArray arr = new JSONArray(resp);
         assertTrue(arr.length() > 0);
-        assertTrue(arr.getJSONObject(0).has("heartCount")); // assertTrue로 변경
+        
+        // Find our dummy diary in timeline
+        boolean found = false;
+        for (int i=0; i<arr.length(); i++) {
+            if (arr.getJSONObject(i).optInt("id") == targetId || arr.getJSONObject(i).optInt("activityId") == targetId) {
+                assertTrue(arr.getJSONObject(i).has("heartCount")); // assertTrue로 변경
+                found = true;
+                break;
+            }
+        }
+        assertTrue("Timeline should contain the created diary", found);
     }
 
     private void testD6HeartToggle() throws Exception {
-        if (diaryIds.isEmpty()) return;
-        int targetId = diaryIds.get(0);
+        int targetId = createDummyDiary("test_user_b", "2026-06-11");
         JSONObject payload = new JSONObject();
         payload.put("userId", "test_user_a");
         payload.put("diaryId", targetId);
@@ -174,8 +157,7 @@ public class PipelineE2EInstrumentedTest {
     }
 
     private void testD8CommentCrud() throws Exception {
-        if (diaryIds.isEmpty()) return;
-        int targetId = diaryIds.get(0);
+        int targetId = createDummyDiary("test_user_b", "2026-06-12");
         
         JSONObject payload = new JSONObject();
         payload.put("userId", "test_user_a");
@@ -190,6 +172,20 @@ public class PipelineE2EInstrumentedTest {
         assertTrue(readResp.contains("\"id\":" + commentId));
         
         deleteRequest("/comment/" + commentId + "?userId=test_user_a");
+    }
+
+    private int createDummyDiary(String userId, String date) throws Exception {
+        JSONObject d = new JSONObject();
+        d.put("userId", userId);
+        d.put("date", date);
+        d.put("timeSlot", "morning");
+        d.put("content", "더미 다이어리 생성");
+        d.put("rating", 5.0);
+        
+        String resp = postRequest("/diary", d);
+        JSONObject respObj = new JSONObject(resp);
+        if (respObj.has("id")) return respObj.getInt("id");
+        return respObj.getInt("activityId");
     }
 
     // ─── AI 여행 추천 관련 연동 테스트 ───

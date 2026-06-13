@@ -154,9 +154,6 @@ public class RecordActivity extends AppCompatActivity {
         findViewById(R.id.btn_save).setOnClickListener(v -> saveRecord());
     }
 
-        });
-    }
-
     private void saveRecord() {
         String content = etContent.getText().toString().trim();
         if (content.isEmpty()) {
