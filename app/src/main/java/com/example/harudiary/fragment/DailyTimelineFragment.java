@@ -114,23 +114,12 @@ public class DailyTimelineFragment extends Fragment {
     }
 
     private void processRecords(List<Record> records) {
-        boolean hasActualRecord = false;
-        for (Record r : records) {
-            if (!r.isPlan()) {
-                hasActualRecord = true;
-                break;
-            }
-        }
-
         List<Record> morningList = new ArrayList<>();
         List<Record> lunchList   = new ArrayList<>();
         List<Record> eveningList = new ArrayList<>();
         List<Record> otherList   = new ArrayList<>();
 
         for (Record r : records) {
-            // "이중 저장" 모순 해결: 실제 기록이 존재하면, 타임라인에서 계획(Plan) 카드는 숨김 처리하여 기록으로 통합된 느낌을 줌
-            if (r.isPlan() && hasActualRecord) continue;
-
             String slot = r.getTimeSlot();
             if ("morning".equals(slot))      morningList.add(r);
             else if ("lunch".equals(slot))   lunchList.add(r);
@@ -138,10 +127,37 @@ public class DailyTimelineFragment extends Fragment {
             else                             otherList.add(r);
         }
 
+        filterPlansIfActualExists(morningList);
+        filterPlansIfActualExists(lunchList);
+        filterPlansIfActualExists(eveningList);
+        filterPlansIfActualExists(otherList);
+
         bindSlot(flMorning, tvMorningTime, morningList, "morning");
         bindSlot(flLunch,   tvLunchTime,   lunchList,   "lunch");
         bindSlot(flEvening, tvEveningTime, eveningList, "evening");
         bindOtherSlot(otherList);
+    }
+
+    private void filterPlansIfActualExists(List<Record> slotList) {
+        boolean hasActual = false;
+        for (Record r : slotList) {
+            if (!r.isPlan()) {
+                hasActual = true;
+                break;
+            }
+        }
+        if (hasActual) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                slotList.removeIf(Record::isPlan);
+            } else {
+                java.util.Iterator<Record> it = slotList.iterator();
+                while (it.hasNext()) {
+                    if (it.next().isPlan()) {
+                        it.remove();
+                    }
+                }
+            }
+        }
     }
 
     private void bindSlot(LinearLayout container, TextView tvTime,
