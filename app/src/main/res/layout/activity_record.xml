@@ -158,7 +158,11 @@
                 android:lineSpacingExtra="6dp"
                 android:textSize="18sp"
                 android:textColor="#37352F"
-                android:textColorHint="#BDBDBD" />
+                android:textColorHint="#BDBDBD"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:scrollbars="vertical"
+                android:isScrollContainer="true"
+                android:breakStrategy="high_quality" />
 
             <!-- 동적 사진 블록: 추가 시에만 보임 -->
             <com.google.android.material.card.MaterialCardView
