@@ -42,6 +42,7 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
     private TravelPlanResponse originalResponse;
     private String userId;
     private PlaceDto lastClickedPlace;
+    private long diaryId = -1;
 
     private final ActivityResultLauncher<Intent> recordActivityLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -75,7 +76,7 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
         originalResponse = (TravelPlanResponse) getIntent().getSerializableExtra("plan");
         date = getIntent().getStringExtra("date");
         boolean isConfirmMode = getIntent().getBooleanExtra("isConfirmMode", false);
-        long diaryId = getIntent().getLongExtra("diaryId", -1);
+        diaryId = getIntent().getLongExtra("diaryId", -1);
 
         ImageButton btnDelete = findViewById(R.id.btn_delete_plan);
 
@@ -197,8 +198,9 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
 
         originalResponse.setDays(newDays);
 
+        Integer finalDiaryId = (diaryId != -1) ? (int) diaryId : null;
         TravelApi api = RetrofitClient.getClient().create(TravelApi.class);
-        api.savePlan(originalResponse, userId, null, date).enqueue(new Callback<Void>() {
+        api.savePlan(originalResponse, userId, finalDiaryId, date).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
@@ -289,8 +291,9 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
 
         originalResponse.setDays(newDays);
 
+        Integer finalDiaryId = (diaryId != -1) ? (int) diaryId : null;
         TravelApi api = RetrofitClient.getClient().create(TravelApi.class);
-        api.savePlan(originalResponse, userId, null, date).enqueue(new Callback<Void>() {
+        api.savePlan(originalResponse, userId, finalDiaryId, date).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 // silently handle
