@@ -157,6 +157,7 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void onBindViewHolder(@NonNull VH vh, int position) {
             Map<String, Object> c = data.get(position);
             

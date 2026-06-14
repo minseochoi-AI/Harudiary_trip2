@@ -11,9 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,8 +21,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.harudiary.R;
-import com.example.harudiary.model.Record;
 import com.example.harudiary.api.RetrofitClient;
+import com.example.harudiary.api.DiaryApi;
 import com.example.harudiary.api.TravelApi;
 import com.example.harudiary.util.SessionManager;
 
@@ -32,12 +31,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import android.app.DatePickerDialog;
 
 public class RecordActivity extends AppCompatActivity {
 
     private static final TimeZone KST = TimeZone.getTimeZone("Asia/Seoul");
-
     private static final int LOCATION_TIMEOUT_MS = 10_000;
     private final Handler locationTimeoutHandler = new Handler(Looper.getMainLooper());
 
@@ -52,7 +49,7 @@ public class RecordActivity extends AppCompatActivity {
     private static final int REQ_PHOTO    = 1001;
     private static final int REQ_LOCATION = 1002;
 
-    private String selectedSlot = null;   // null = 시간대 미지정
+    private String selectedSlot = null;
     private String selectedDate;
     private String selectedPhotoUri = null;
 
@@ -61,11 +58,10 @@ public class RecordActivity extends AppCompatActivity {
     private String currentWeather = "";
     private float  currentTemperature = 0f;
 
-    private TextView tvAutoDatetime, tvAutoWeather, tvLocation;
+    private TextView tvAutoDatetime, tvAutoWeather, tvLocation, tvActivityTitle;
     private ImageView ivPhoto;
     private android.widget.EditText etContent;
-    private android.view.View layoutPhotoContainer;
-    private android.widget.ImageButton btnRemovePhoto;
+    private View layoutPhotoContainer;
     private com.google.android.material.button.MaterialButton btnAddPhoto;
 
     private LocationManager locationManager;
@@ -89,10 +85,10 @@ public class RecordActivity extends AppCompatActivity {
         tvAutoDatetime = findViewById(R.id.tv_auto_datetime);
         tvAutoWeather  = findViewById(R.id.tv_auto_weather);
         tvLocation     = findViewById(R.id.tv_location);
+        tvActivityTitle = findViewById(R.id.tv_activity_title);
         ivPhoto        = findViewById(R.id.iv_photo);
         etContent      = findViewById(R.id.et_content);
         layoutPhotoContainer = findViewById(R.id.layout_photo_container);
-        btnRemovePhoto = findViewById(R.id.btn_remove_photo);
         btnAddPhoto    = findViewById(R.id.btn_add_photo);
     }
 
@@ -103,19 +99,14 @@ public class RecordActivity extends AppCompatActivity {
             sdf.setTimeZone(KST);
             selectedDate = sdf.format(new Date());
         }
-        // ★ EXTRA_SLOT이 명시적으로 전달된 경우에만 시간대 선택, 아니면 null(미선택) 상태 유지
-        String extraSlot = getIntent().getStringExtra(EXTRA_SLOT);
-        selectedSlot = (extraSlot != null && !extraSlot.isEmpty()) ? extraSlot : null;
+        
+        selectedSlot = getIntent().getStringExtra(EXTRA_SLOT);
 
         String prefillContent = getIntent().getStringExtra(EXTRA_PREFILL_CONTENT);
         if (prefillContent != null) {
             etContent.setText(prefillContent);
             etContent.setHint("이 장소에서 어떤 추억을 남겼나요?");
-            
-            TextView tvTitle = findViewById(R.id.tv_activity_title);
-            if (tvTitle != null) {
-                tvTitle.setText("방문 인증하기");
-            }
+            if (tvActivityTitle != null) tvActivityTitle.setText("방문 인증하기");
         }
         
         String prefillAddress = getIntent().getStringExtra(EXTRA_PREFILL_ADDRESS);
@@ -129,23 +120,23 @@ public class RecordActivity extends AppCompatActivity {
     }
 
     private void setAutoDatetime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일 HH:mm", Locale.KOREA);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA);
         sdf.setTimeZone(KST);
         tvAutoDatetime.setText(sdf.format(new Date()));
     }
 
     private void setupPhotoButton() {
-        android.view.View.OnClickListener pickPhotoListener = v -> {
+        View.OnClickListener pickPhotoListener = v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, REQ_PHOTO);
         };
         btnAddPhoto.setOnClickListener(pickPhotoListener);
         ivPhoto.setOnClickListener(pickPhotoListener);
         
-        btnRemovePhoto.setOnClickListener(v -> {
+        findViewById(R.id.btn_remove_photo).setOnClickListener(v -> {
             selectedPhotoUri = null;
-            layoutPhotoContainer.setVisibility(android.view.View.GONE);
-            btnAddPhoto.setVisibility(android.view.View.VISIBLE);
+            layoutPhotoContainer.setVisibility(View.GONE);
+            btnAddPhoto.setVisibility(View.VISIBLE);
         });
     }
 
@@ -154,34 +145,37 @@ public class RecordActivity extends AppCompatActivity {
         findViewById(R.id.btn_save).setOnClickListener(v -> saveRecord());
     }
 
+    private String getAutoTimeSlot() {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        if (hour >= 5 && hour < 11) return "morning";
+        if (hour >= 11 && hour < 17) return "lunch";
+        return "evening";
+    }
+
     private void saveRecord() {
         String content = etContent.getText().toString().trim();
         if (content.isEmpty()) {
             Toast.makeText(this, "활동 내용을 입력해주세요", Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        if (currentLat == 0 && currentLng == 0 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "위치 정보를 로딩 중입니다. 잠시 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         String userId = new SessionManager(this).getUserId();
+        String slot = (selectedSlot != null) ? selectedSlot : getAutoTimeSlot();
 
         java.util.Map<String, Object> payload = new java.util.HashMap<>();
         payload.put("userId", userId);
         payload.put("date", selectedDate);
-        payload.put("timeSlot", selectedSlot);
+        payload.put("timeSlot", slot);
         payload.put("content", content);
         payload.put("photoUri", selectedPhotoUri);
-        payload.put("rating", 0.0f); // 별점 기능 삭제됨
+        payload.put("rating", 0.0f); // 별점 삭제됨
         payload.put("latitude", currentLat);
         payload.put("longitude", currentLng);
         payload.put("address", currentAddress);
         payload.put("weather", currentWeather);
         payload.put("temperature", currentTemperature);
 
-        com.example.harudiary.api.RetrofitClient.getInstance().create(com.example.harudiary.api.DiaryApi.class).createDiary(payload).enqueue(new retrofit2.Callback<com.example.harudiary.model.Record>() {
+        RetrofitClient.getInstance().create(DiaryApi.class).createDiary(payload).enqueue(new retrofit2.Callback<com.example.harudiary.model.Record>() {
             @Override
             public void onResponse(@NonNull retrofit2.Call<com.example.harudiary.model.Record> call, @NonNull retrofit2.Response<com.example.harudiary.model.Record> response) {
                 if (response.isSuccessful()) {
@@ -195,7 +189,7 @@ public class RecordActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull retrofit2.Call<com.example.harudiary.model.Record> call, @NonNull Throwable t) {
-                Toast.makeText(RecordActivity.this, "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(RecordActivity.this, "네트워크 오류", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -208,102 +202,53 @@ public class RecordActivity extends AppCompatActivity {
             if (uri != null) {
                 selectedPhotoUri = uri.toString();
                 ivPhoto.setImageURI(uri);
-                layoutPhotoContainer.setVisibility(android.view.View.VISIBLE);
-                btnAddPhoto.setVisibility(android.view.View.GONE);
+                layoutPhotoContainer.setVisibility(View.VISIBLE);
+                btnAddPhoto.setVisibility(View.GONE);
             }
         }
     }
 
     private void requestLocationAndFetchData() {
-        if (currentLat != 0 && currentLng != 0) {
-            return;
-        }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION},
-                    REQ_LOCATION);
+        if (currentLat != 0 && currentLng != 0) return;
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_LOCATION);
             return;
         }
         startLocationUpdates();
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_LOCATION
-                && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == REQ_LOCATION && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             startLocationUpdates();
-        } else {
-            tvLocation.setText("위치 권한이 없습니다");
-            tvAutoWeather.setText("날씨 정보 없음");
         }
     }
 
     private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) return;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return;
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (locationManager == null) {
-            tvLocation.setText("위치 서비스 사용 불가");
-            tvAutoWeather.setText("날씨 정보 없음");
-            return;
-        }
-
-        Location last = null;
-        try {
-            last = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (last == null)
-                last = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        } catch (Exception ignored) { }
-        if (last != null) {
-            onLocationAcquired(last);
-            return;
-        }
+        if (locationManager == null) return;
 
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 locationTimeoutHandler.removeCallbacksAndMessages(null);
                 onLocationAcquired(location);
-                try { locationManager.removeUpdates(this); } catch (Exception ignored) { }
+                try { locationManager.removeUpdates(this); } catch (Exception ignored) {}
             }
         };
 
-        boolean registered = false;
         try {
             if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.requestLocationUpdates(
-                        LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-                registered = true;
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
             }
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-                registered = true;
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
             }
-        } catch (Exception e) {
-            tvLocation.setText("위치 정보를 가져올 수 없습니다");
-            tvAutoWeather.setText("날씨 정보 없음");
-            return;
-        }
-
-        if (!registered) {
-            tvLocation.setText("위치 서비스가 꺼져 있습니다");
-            tvAutoWeather.setText("날씨 정보 없음");
-            return;
-        }
-
-        locationTimeoutHandler.postDelayed(() -> {
-            if (currentLat == 0 && currentLng == 0) {
-                tvLocation.setText("위치를 가져올 수 없습니다 (GPS 확인)");
-                tvAutoWeather.setText("날씨 정보 없음");
-            }
-        }, LOCATION_TIMEOUT_MS);
+        } catch (Exception ignored) {}
     }
 
     private void onLocationAcquired(Location location) {
@@ -319,26 +264,13 @@ public class RecordActivity extends AppCompatActivity {
                     currentAddress = (String) body.get("address");
                     currentWeather = (String) body.get("weather");
                     currentTemperature = ((Number) body.get("temperature")).floatValue();
-
                     runOnUiThread(() -> {
                         tvLocation.setText("📍 " + currentAddress);
                         tvAutoWeather.setText(currentWeather + " " + currentTemperature + "℃");
                     });
-                } else {
-                    runOnUiThread(() -> {
-                        tvLocation.setText("주소를 가져올 수 없습니다");
-                        tvAutoWeather.setText("날씨 정보 없음");
-                    });
                 }
             }
-
-            @Override
-            public void onFailure(@NonNull retrofit2.Call<java.util.Map<String, Object>> call, @NonNull Throwable t) {
-                runOnUiThread(() -> {
-                    tvLocation.setText("주소를 가져올 수 없습니다");
-                    tvAutoWeather.setText("날씨 정보 없음");
-                });
-            }
+            @Override public void onFailure(@NonNull retrofit2.Call<java.util.Map<String, Object>> call, @NonNull Throwable t) {}
         });
     }
 
@@ -347,7 +279,7 @@ public class RecordActivity extends AppCompatActivity {
         super.onDestroy();
         locationTimeoutHandler.removeCallbacksAndMessages(null);
         if (locationManager != null && locationListener != null) {
-            try { locationManager.removeUpdates(locationListener); } catch (Exception ignored) { }
+            try { locationManager.removeUpdates(locationListener); } catch (Exception ignored) {}
         }
     }
 }
