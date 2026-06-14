@@ -84,7 +84,7 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
             }
         }
 
-        adapter = new TravelPlanAdapter(flattenedList, this);
+        adapter = new TravelPlanAdapter(flattenedList, this, true);
         rvTravelPlan.setAdapter(adapter);
 
         setupItemTouchHelper();

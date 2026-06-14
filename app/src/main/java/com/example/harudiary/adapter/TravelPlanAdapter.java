@@ -35,9 +35,12 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
     private List<PlaceDto> places;
     private OnVisitCompleteListener listener;
 
-    public TravelPlanAdapter(List<PlaceDto> places, OnVisitCompleteListener listener) {
+    private boolean isConfirmMode;
+
+    public TravelPlanAdapter(List<PlaceDto> places, OnVisitCompleteListener listener, boolean isConfirmMode) {
         this.places = places;
         this.listener = listener;
+        this.isConfirmMode = isConfirmMode;
     }
 
     public void update(List<PlaceDto> newPlaces) {
@@ -119,7 +122,7 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
         }
 
         // Add Visit button dynamically
-        if (holder.layoutHeader != null) {
+        if (holder.layoutHeader != null && !isConfirmMode) {
             android.widget.Button btnVisit = holder.itemView.findViewWithTag("btnVisit");
             if (btnVisit == null) {
                 btnVisit = new android.widget.Button(holder.itemView.getContext());
