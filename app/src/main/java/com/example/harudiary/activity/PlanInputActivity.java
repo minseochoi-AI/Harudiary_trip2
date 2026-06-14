@@ -36,7 +36,9 @@ public class PlanInputActivity extends AppCompatActivity {
 
     private EditText etDestination;
     private EditText etContent;
+    private TextView tvStartDate;
     private TextView tvEndDate;
+    private String endDateStr;
     private com.google.android.material.slider.Slider sliderPlacesPerDay;
     private AlertDialog loadingDialog;
 
@@ -53,13 +55,14 @@ public class PlanInputActivity extends AppCompatActivity {
     private void initViews() {
         etDestination = findViewById(R.id.et_destination);
         etContent = findViewById(R.id.et_content);
+        tvStartDate = findViewById(R.id.tv_start_date);
         tvEndDate = findViewById(R.id.tv_end_date);
         sliderPlacesPerDay = findViewById(R.id.slider_places_per_day);
 
         findViewById(R.id.btn_close).setOnClickListener(v -> finish());
 
-        Button btnSelectEndDate = findViewById(R.id.btn_select_end_date);
-        btnSelectEndDate.setOnClickListener(v -> showDatePickerDialog());
+        tvStartDate.setOnClickListener(v -> showStartDatePickerDialog());
+        tvEndDate.setOnClickListener(v -> showEndDatePickerDialog());
 
         Button btnGenerate = findViewById(R.id.btn_generate_travel_plan);
         btnGenerate.setOnClickListener(v -> generateTravelPlan());
@@ -72,13 +75,44 @@ public class PlanInputActivity extends AppCompatActivity {
             sdf.setTimeZone(KST);
             selectedDate = sdf.format(new Date());
         }
+        endDateStr = selectedDate; // 초기에는 종료일도 시작일과 같게 설정
+        
         String prefillContent = getIntent().getStringExtra("EXTRA_CONTENT");
         if (prefillContent != null && !prefillContent.isEmpty()) {
             etContent.setText(prefillContent);
         }
+        
+        updateDateUI();
     }
 
-    private void showDatePickerDialog() {
+    private void updateDateUI() {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+            sdf.setTimeZone(KST);
+            
+            Date startObj = sdf.parse(selectedDate);
+            Date endObj = sdf.parse(endDateStr);
+            
+            if (endObj.before(startObj)) {
+                endDateStr = selectedDate;
+                endObj = startObj;
+            }
+            
+            long diffInMillis = endObj.getTime() - startObj.getTime();
+            calculatedDays = (int) (diffInMillis / (1000 * 60 * 60 * 24)) + 1;
+            
+            tvStartDate.setText(selectedDate);
+            if (calculatedDays == 1) {
+                tvEndDate.setText(endDateStr + " (당일치기)");
+            } else {
+                tvEndDate.setText(String.format(Locale.KOREA, "%s (%d박 %d일)", endDateStr, calculatedDays - 1, calculatedDays));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showStartDatePickerDialog() {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
             sdf.setTimeZone(KST);
@@ -87,23 +121,37 @@ public class PlanInputActivity extends AppCompatActivity {
             if (start != null) cal.setTime(start);
 
             DatePickerDialog dialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
-                Calendar endCal = Calendar.getInstance(KST);
-                endCal.set(year, month, dayOfMonth);
+                Calendar newStartCal = Calendar.getInstance(KST);
+                newStartCal.set(year, month, dayOfMonth);
+                selectedDate = sdf.format(newStartCal.getTime());
+                updateDateUI();
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void showEndDatePickerDialog() {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+            sdf.setTimeZone(KST);
+            Date end = sdf.parse(endDateStr);
+            Calendar cal = Calendar.getInstance(KST);
+            if (end != null) cal.setTime(end);
+
+            DatePickerDialog dialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+                Calendar newEndCal = Calendar.getInstance(KST);
+                newEndCal.set(year, month, dayOfMonth);
+                
                 try {
                     Date startObj = sdf.parse(selectedDate);
-                    Date endObj = endCal.getTime();
-
-                    if (endObj.before(startObj)) {
-                        Toast.makeText(this, "종료일은 시작일 이후여야 합니다.", Toast.LENGTH_SHORT).show();
+                    if (newEndCal.getTime().before(startObj)) {
+                        Toast.makeText(this, "종료일은 시작일과 같거나 이후여야 합니다.", Toast.LENGTH_SHORT).show();
                         return;
                     }
-
-                    long diffInMillis = endObj.getTime() - startObj.getTime();
-                    calculatedDays = (int) (diffInMillis / (1000 * 60 * 60 * 24)) + 1;
-
-                    String endDateStr = sdf.format(endObj);
-                    tvEndDate.setText(String.format(Locale.KOREA, "%s (%d박 %d일)", endDateStr, calculatedDays - 1, calculatedDays));
+                    endDateStr = sdf.format(newEndCal.getTime());
+                    updateDateUI();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
