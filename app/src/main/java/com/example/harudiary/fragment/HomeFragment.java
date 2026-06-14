@@ -578,11 +578,15 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private static String slotToKorean(String slot) {
-        if ("morning".equals(slot)) return "아침";
-        if ("lunch".equals(slot))   return "점심";
-        if ("evening".equals(slot)) return "저녁";
-        return "기타";
+    private String slotToKorean(String slot) {
+        if (slot == null) return "일정";
+        if (slot.contains("일차")) return slot;
+        switch (slot) {
+            case "morning": return "아침";
+            case "lunch": return "점심";
+            case "evening": return "저녁";
+            default: return "전체";
+        }
     }
 
     private int dpToPx(int dp) {
