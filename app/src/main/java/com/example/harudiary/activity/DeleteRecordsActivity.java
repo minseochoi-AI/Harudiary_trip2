@@ -38,7 +38,9 @@ import java.util.Set;
  */
 public class DeleteRecordsActivity extends AppCompatActivity {
 
-       private String date;
+    public static final String EXTRA_DATE = "extra_date";
+
+    private String date;
     private String userIdStr;
 
     private List<Record>  records = new ArrayList<>();

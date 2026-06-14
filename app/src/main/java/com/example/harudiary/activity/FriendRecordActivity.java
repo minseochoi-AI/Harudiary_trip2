@@ -406,7 +406,7 @@ public class FriendRecordActivity extends AppCompatActivity {
         });
 
         btnComment.setOnClickListener(v -> {
-            CommentBottomSheetFragment sheet = CommentBottomSheetFragment.newInstance(activityId.intValue());
+            CommentBottomSheetFragment sheet = CommentBottomSheetFragment.newInstance(activityId);
             sheet.setOnCommentChangedListener(() -> render()); // Re-render to refresh counts
             try {
                 sheet.show(getSupportFragmentManager(), "comments_" + activityId);
