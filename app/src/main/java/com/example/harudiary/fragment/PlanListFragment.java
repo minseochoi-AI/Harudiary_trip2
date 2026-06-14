@@ -69,6 +69,15 @@ public class PlanListFragment extends Fragment {
                 List<Record> plans = new ArrayList<>();
                 if (response.isSuccessful() && response.body() != null) {
                     plans = response.body();
+                    // 서버가 잘못된 데이터를 내려줄 경우를 대비한 2차 필터링 (방어적 코드)
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        plans.removeIf(r -> !r.isPlan());
+                    } else {
+                        java.util.Iterator<Record> it = plans.iterator();
+                        while (it.hasNext()) {
+                            if (!it.next().isPlan()) it.remove();
+                        }
+                    }
                 }
                 updateUI(plans);
             }
