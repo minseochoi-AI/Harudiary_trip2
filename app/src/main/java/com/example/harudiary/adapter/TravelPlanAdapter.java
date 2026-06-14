@@ -122,7 +122,7 @@ public class TravelPlanAdapter extends RecyclerView.Adapter<TravelPlanAdapter.Vi
         }
 
         // Add Visit button dynamically
-        if (holder.layoutHeader != null && !isConfirmMode) {
+        if (holder.layoutHeader != null && isConfirmMode) {
             android.widget.Button btnVisit = holder.itemView.findViewWithTag("btnVisit");
             if (btnVisit == null) {
                 btnVisit = new android.widget.Button(holder.itemView.getContext());
