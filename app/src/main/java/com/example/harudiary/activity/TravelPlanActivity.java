@@ -80,7 +80,7 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
 
         if (isConfirmMode) {
             btnSave.setVisibility(android.view.View.GONE);
-            btnDelete.setVisibility(View.VISIBLE);
+            btnDelete.setVisibility(android.view.View.VISIBLE);
             btnDelete.setOnClickListener(v -> showDeleteConfirmDialog(diaryId));
         }
 
