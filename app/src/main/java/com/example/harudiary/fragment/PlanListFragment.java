@@ -118,6 +118,7 @@ public class PlanListFragment extends Fragment {
                     intent.putExtra("plan", response.body());
                     intent.putExtra("isConfirmMode", true);
                     intent.putExtra("diaryId", plan.getActivityId());
+                    intent.putExtra("date", plan.getDate()); // Fix: pass date to prevent NULL in DB
                     startActivity(intent);
                 } else {
                     if (isAdded() && getActivity() != null) {
