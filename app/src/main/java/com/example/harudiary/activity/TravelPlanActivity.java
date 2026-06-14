@@ -59,6 +59,11 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
         // Get intent data
         originalResponse = (TravelPlanResponse) getIntent().getSerializableExtra("plan");
         date = getIntent().getStringExtra("date");
+        boolean isConfirmMode = getIntent().getBooleanExtra("isConfirmMode", false);
+
+        if (isConfirmMode) {
+            btnSave.setVisibility(android.view.View.GONE);
+        }
 
         if (originalResponse != null) {
             if (originalResponse.getTripTitle() != null) {
@@ -84,7 +89,7 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
             }
         }
 
-        adapter = new TravelPlanAdapter(flattenedList, this, true);
+        adapter = new TravelPlanAdapter(flattenedList, this, isConfirmMode);
         rvTravelPlan.setAdapter(adapter);
 
         setupItemTouchHelper();
