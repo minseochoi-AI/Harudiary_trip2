@@ -88,16 +88,16 @@ public class PipelineE2EInstrumentedTest {
         int activityId = createDummyDiary("seed_user_B", "2026-06-07");
         assertTrue(activityId > 0);
 
-        String readResp = getRequest("/diary/test_user_b");
+        String readResp = getRequest("/diary/seed_user_B");
         JSONArray readArray = new JSONArray(readResp);
         assertTrue(readArray.length() > 0);
     }
 
     private void testD3DiaryDelete() throws Exception {
         int targetId = createDummyDiary("seed_user_B", "2026-06-08");
-        deleteRequest("/diary/" + targetId);
+        deleteRequest("/diary/" + targetId + "?userId=seed_user_B");
         
-        String readResp = getRequest("/diary/test_user_b");
+        String readResp = getRequest("/diary/seed_user_B");
         assertFalse(readResp.contains("\"activityId\":" + targetId));
     }
 
