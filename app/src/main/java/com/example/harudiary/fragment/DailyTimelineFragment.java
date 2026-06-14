@@ -21,6 +21,7 @@ import com.example.harudiary.R;
 import com.example.harudiary.activity.PlanInputActivity;
 import com.example.harudiary.activity.RecordActivity;
 import com.example.harudiary.model.Record;
+import com.example.harudiary.MainActivity;
 import com.example.harudiary.util.SessionManager;
 
 import java.util.ArrayList;
