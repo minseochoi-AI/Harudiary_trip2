@@ -1,7 +1,11 @@
 package com.example.harudiary.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class DiaryDateDto {
     private String date;
+    
+    @SerializedName(value = "plan", alternate = {"isPlan"})
     private Boolean isPlan;
 
     public String getDate() { return date; }

@@ -17,7 +17,10 @@ public class Record {
     private String weather;
     private float temperature;
     private long timestamp;
+    
+    @SerializedName(value = "plan", alternate = {"isPlan"})
     private boolean isPlan;
+    
     private int duration;
 
     private String title;
