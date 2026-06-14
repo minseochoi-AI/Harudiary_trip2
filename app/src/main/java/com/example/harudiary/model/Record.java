@@ -18,6 +18,7 @@ public class Record {
     private float temperature;
     private long timestamp;
     private boolean isPlan;
+    private int duration;
 
     public Record() {}
 
@@ -62,4 +63,7 @@ public class Record {
 
     public boolean isPlan() { return isPlan; }
     public void setPlan(boolean plan) { isPlan = plan; }
+
+    public int getDuration() { return duration; }
+    public void setDuration(int duration) { this.duration = duration; }
 }

@@ -166,7 +166,20 @@ public class DailyTimelineFragment extends Fragment {
             }
 
             // 시각
-            holder.tvCardTime.setText("🕐 " + DateFormat.format("HH:mm", new Date(record.getTimestamp())));
+            if (record.isPlan()) {
+                String slot = record.getTimeSlot();
+                if (slot != null && slot.contains("일차")) {
+                    holder.tvCardTime.setText("🕐 " + slot + " 일정");
+                } else {
+                    String koreanSlot = "전체";
+                    if ("morning".equals(slot)) koreanSlot = "아침";
+                    else if ("lunch".equals(slot)) koreanSlot = "점심";
+                    else if ("evening".equals(slot)) koreanSlot = "저녁";
+                    holder.tvCardTime.setText("🕐 " + koreanSlot + " 일정");
+                }
+            } else {
+                holder.tvCardTime.setText("🕐 " + DateFormat.format("HH:mm", new Date(record.getTimestamp())));
+            }
 
             // 날씨
             String w = record.getWeather();
