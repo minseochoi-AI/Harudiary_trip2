@@ -37,7 +37,7 @@ public class FriendListFragment extends Fragment {
     private LinearLayout layoutEmpty;
     private TextView tvFriendCount;
     private FriendApi friendApi;
-    private int userId;
+    private String userIdStr;
 
     @Nullable
     @Override
@@ -45,7 +45,7 @@ public class FriendListFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_friend_list, container, false);
 
-        String userId = new SessionManager(requireContext()).getUserId();
+        userIdStr = new SessionManager(requireContext()).getUserId();
         friendApi = RetrofitClient.getClient().create(FriendApi.class);
 
         rvFriends      = view.findViewById(R.id.rv_friends);
@@ -70,7 +70,8 @@ public class FriendListFragment extends Fragment {
     public void onResume() { super.onResume(); if (friendApi != null) loadFriends(); }
 
     private void loadFriends() {
-        friendApi.getFriends(String.valueOf(userId)).enqueue(new Callback<List<User>>() {
+        if (userIdStr == null) return;
+        friendApi.getFriends(userIdStr).enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(@NonNull Call<List<User>> call, @NonNull Response<List<User>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -132,14 +133,16 @@ public class FriendListFragment extends Fragment {
                     .setTitle("친구 삭제")
                     .setMessage(friend.getName() + "님을 친구 목록에서 삭제하시겠습니까?")
                     .setPositiveButton("삭제", (d, w) -> {
-                        friendApi.deleteFriend(String.valueOf(userId), friend.getUserId()).enqueue(new Callback<Void>() {
-                            @Override
-                            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                                loadFriends();
-                            }
-                            @Override
-                            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
-                        });
+                        if (userIdStr != null) {
+                            friendApi.deleteFriend(userIdStr, friend.getUserId()).enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                    loadFriends();
+                                }
+                                @Override
+                                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+                            });
+                        }
                     })
                     .setNegativeButton("취소", null)
                     .show();

@@ -150,7 +150,9 @@ public class RecordListFragment extends Fragment {
                     allRecords = response.body();
                     // 내림차순 정렬 (날짜 -> activityId)
                     allRecords.sort((r1, r2) -> {
-                        int dateCmp = r2.getDate().compareTo(r1.getDate());
+                        String d1 = r1.getDate() != null ? r1.getDate() : "";
+                        String d2 = r2.getDate() != null ? r2.getDate() : "";
+                        int dateCmp = d2.compareTo(d1);
                         if (dateCmp != 0) return dateCmp;
                         Long id1 = r1.getActivityId();
                         Long id2 = r2.getActivityId();
