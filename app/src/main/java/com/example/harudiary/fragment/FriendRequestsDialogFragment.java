@@ -40,7 +40,7 @@ public class FriendRequestsDialogFragment extends DialogFragment {
     }
 
     private FriendApi friendApi;
-    private int userId;
+    private String userId;
     private FriendRequestAdapter adapter;
     private OnRequestHandledListener listener;
 
@@ -68,7 +68,7 @@ public class FriendRequestsDialogFragment extends DialogFragment {
 
         rvRequests.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        friendApi.getPendingRequests(String.valueOf(userId)).enqueue(new Callback<List<FriendRequest>>() {
+        friendApi.getPendingRequests(userId).enqueue(new Callback<List<FriendRequest>>() {
             @Override
             public void onResponse(@NonNull Call<List<FriendRequest>> call, @NonNull Response<List<FriendRequest>> response) {
                 if (response.isSuccessful() && response.body() != null) {

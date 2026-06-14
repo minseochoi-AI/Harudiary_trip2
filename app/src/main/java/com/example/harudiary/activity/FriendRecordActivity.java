@@ -68,7 +68,7 @@ public class FriendRecordActivity extends AppCompatActivity {
 
     // ── 데이터 ──
     private String myUserId;
-    private int friendUserId;
+    private String friendUserId;
     private String friendName;
     private String currentDate;
     private List<String> allDates = new ArrayList<>();
@@ -100,7 +100,7 @@ public class FriendRecordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_record);
 
-        friendUserId = getIntent().getIntExtra(EXTRA_FRIEND_USER_ID, -1);
+        friendUserId = getIntent().getStringExtra(EXTRA_FRIEND_USER_ID);
         friendName   = getIntent().getStringExtra(EXTRA_FRIEND_NAME);
         currentDate  = getIntent().getStringExtra(EXTRA_TARGET_DATE);
 
@@ -164,7 +164,7 @@ public class FriendRecordActivity extends AppCompatActivity {
 
     private void loadInitialDates() {
         FriendApi api = RetrofitClient.getClient().create(FriendApi.class);
-        api.getFriendDates(String.valueOf(friendUserId)).enqueue(new Callback<List<String>>() {
+        api.getFriendDates(friendUserId).enqueue(new Callback<List<String>>() {
             @Override
             public void onResponse(@NonNull Call<List<String>> call, @NonNull Response<List<String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -199,7 +199,7 @@ public class FriendRecordActivity extends AppCompatActivity {
         tvMoreTitle.setText(friendName + "의 공유 기록 더보기");
 
         FriendApi api = RetrofitClient.getClient().create(FriendApi.class);
-        api.getFriendTimeline(myUserId, String.valueOf(friendUserId), currentDate).enqueue(new Callback<List<TimelineDTO>>() {
+        api.getFriendTimeline(myUserId, friendUserId, currentDate).enqueue(new Callback<List<TimelineDTO>>() {
             @Override
             public void onResponse(@NonNull Call<List<TimelineDTO>> call, @NonNull Response<List<TimelineDTO>> response) {
                 if (response.isSuccessful() && response.body() != null) {
