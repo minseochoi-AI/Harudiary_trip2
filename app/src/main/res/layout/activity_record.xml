@@ -185,7 +185,7 @@
                         android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_margin="12dp"
-                        android:background="@drawable/bg_circle_white"
+                        android:background="@drawable/bg_rounded_white"
                         android:src="@android:drawable/ic_menu_close_clear_cancel"
                         app:tint="#37352F" />
                 </RelativeLayout>
