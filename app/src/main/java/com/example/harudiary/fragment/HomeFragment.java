@@ -208,11 +208,12 @@ public class HomeFragment extends Fragment {
                 java.util.Map<String, Boolean> recordDates = new java.util.HashMap<>();
                 if (response.isSuccessful() && response.body() != null) {
                     for (com.example.harudiary.model.DiaryDateDto dto : response.body()) {
+                        boolean isPlan = Boolean.TRUE.equals(dto.getIsPlan());
                         // If plan (true) already exists, don't overwrite with record (false)
-                        if (recordDates.containsKey(dto.getDate()) && recordDates.get(dto.getDate()) && !dto.getIsPlan()) {
+                        if (recordDates.containsKey(dto.getDate()) && Boolean.TRUE.equals(recordDates.get(dto.getDate())) && !isPlan) {
                             continue;
                         }
-                        recordDates.put(dto.getDate(), dto.getIsPlan());
+                        recordDates.put(dto.getDate(), isPlan);
                     }
                 }
                 updateCalendarUI(recordDates, todayInMonth);
