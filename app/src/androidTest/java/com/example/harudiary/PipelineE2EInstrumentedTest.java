@@ -70,24 +70,14 @@ public class PipelineE2EInstrumentedTest {
 
     private void testD1RegisterLogin() {
         try {
-            // Register A
-            JSONObject regA = new JSONObject();
-            regA.put("id", "test_user_a");
-            regA.put("nickname", "유저A");
-            postRequest("/user/register", regA);
+            // Register is skipped because Seed data is already present in DB.
 
-            // Register B
-            JSONObject regB = new JSONObject();
-            regB.put("id", "test_user_b");
-            regB.put("nickname", "유저B");
-            postRequest("/user/register", regB);
-
-            // Login A
+            // Login A (seed_user_A)
             JSONObject loginA = new JSONObject();
-            loginA.put("id", "test_user_a");
+            loginA.put("id", "seed_user_A");
             String loginResp = postRequest("/user/login", loginA);
             JSONObject loginJson = new JSONObject(loginResp);
-            assertEquals("test_user_a", loginJson.getString("id"));
+            assertEquals("seed_user_A", loginJson.getString("id"));
             
         } catch (Exception e) {
             System.out.println("D1 진행 중 가입/로그인 실패 (이미 가입된 유저일 수 있음): " + e.getMessage());
@@ -95,7 +85,7 @@ public class PipelineE2EInstrumentedTest {
     }
 
     private void testD2DiaryCreateRead() throws Exception {
-        int activityId = createDummyDiary("test_user_b", "2026-06-07");
+        int activityId = createDummyDiary("seed_user_B", "2026-06-07");
         assertTrue(activityId > 0);
 
         String readResp = getRequest("/diary/test_user_b");
@@ -104,7 +94,7 @@ public class PipelineE2EInstrumentedTest {
     }
 
     private void testD3DiaryDelete() throws Exception {
-        int targetId = createDummyDiary("test_user_b", "2026-06-08");
+        int targetId = createDummyDiary("seed_user_B", "2026-06-08");
         deleteRequest("/diary/" + targetId);
         
         String readResp = getRequest("/diary/test_user_b");
@@ -113,8 +103,8 @@ public class PipelineE2EInstrumentedTest {
 
     private void testD4FriendRequest() throws Exception {
         JSONObject req = new JSONObject();
-        req.put("fromUserId", "test_user_a");
-        req.put("toUserId", "test_user_b");
+        req.put("fromUserId", "seed_user_A");
+        req.put("toUserId", "seed_user_B");
         try {
             postRequest("/friend/request", req);
         } catch(Exception e) {
@@ -123,7 +113,7 @@ public class PipelineE2EInstrumentedTest {
     }
 
     private void testD5Timeline() throws Exception {
-        int targetId = createDummyDiary("test_user_b", "2026-06-07");
+        int targetId = createDummyDiary("seed_user_B", "2026-06-07");
         String resp = getRequest("/friend/timeline?myUserId=test_user_a&friendId=test_user_b&date=2026-06-07");
         JSONArray arr = new JSONArray(resp);
         assertTrue(arr.length() > 0);
@@ -141,9 +131,9 @@ public class PipelineE2EInstrumentedTest {
     }
 
     private void testD6HeartToggle() throws Exception {
-        int targetId = createDummyDiary("test_user_b", "2026-06-11");
+        int targetId = createDummyDiary("seed_user_B", "2026-06-11");
         JSONObject payload = new JSONObject();
-        payload.put("userId", "test_user_a");
+        payload.put("userId", "seed_user_A");
         payload.put("diaryId", targetId);
         
         // Toggle ON (이전 상태에 따라 true/false일 수 있으므로 호출만 테스트)
@@ -157,10 +147,10 @@ public class PipelineE2EInstrumentedTest {
     }
 
     private void testD8CommentCrud() throws Exception {
-        int targetId = createDummyDiary("test_user_b", "2026-06-12");
+        int targetId = createDummyDiary("seed_user_B", "2026-06-12");
         
         JSONObject payload = new JSONObject();
-        payload.put("userId", "test_user_a");
+        payload.put("userId", "seed_user_A");
         payload.put("diaryId", targetId);
         payload.put("content", "멋진 기록이네요! (Android)");
         

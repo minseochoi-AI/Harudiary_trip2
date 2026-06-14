@@ -38,9 +38,9 @@ public class FriendManagementE2EInstrumentedTest {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private OkHttpClient client;
 
-    private final String USER_A = "fm_user_a";
-    private final String USER_B = "fm_user_b";
-    private final String USER_C = "fm_user_c";
+    private final String USER_A = "seed_user_A";
+    private final String USER_B = "seed_user_B";
+    private final String USER_C = "seed_user_C";
 
     @Before
     public void setUp() {
@@ -57,7 +57,7 @@ public class FriendManagementE2EInstrumentedTest {
         // 1. 친구 찾기 및 둘러보기
         testFriendSearchAndBrowse();
 
-        // 2. 친구 요청 생성 및 대기 인원 / 상태 확인
+        // 2. 친구 요청 생성 및 대기 인원 / 상태 확인 (Seed Data: C -> A PENDING)
         long requestId = testFriendRequestAndStatus();
 
         // 3. 친구 거절
@@ -68,16 +68,12 @@ public class FriendManagementE2EInstrumentedTest {
     }
 
     private void setupUsers() {
-        try {
-            JSONObject uA = new JSONObject(); uA.put("id", USER_A); uA.put("nickname", "A사용자"); postRequest("/user/register", uA);
-            JSONObject uB = new JSONObject(); uB.put("id", USER_B); uB.put("nickname", "B사용자"); postRequest("/user/register", uB);
-            JSONObject uC = new JSONObject(); uC.put("id", USER_C); uC.put("nickname", "C사용자"); postRequest("/user/register", uC);
-        } catch (Exception ignored) {}
+        // Seed 데이터가 존재하므로 유저 생성(register) 단계를 생략합니다.
     }
 
     private void testFriendSearchAndBrowse() throws Exception {
         // GET /api/friend/search
-        String searchResp = getRequest("/friend/search?userId=" + USER_A + "&query=B사용자");
+        String searchResp = getRequest("/friend/search?userId=" + USER_A + "&query=시드유저B");
         JSONArray searchArr = new JSONArray(searchResp);
         assertTrue("검색 결과가 1건 이상이어야 합니다.", searchArr.length() > 0);
 
@@ -88,28 +84,23 @@ public class FriendManagementE2EInstrumentedTest {
     }
 
     private long testFriendRequestAndStatus() throws Exception {
-        // USER_A -> USER_B 친구 요청
-        JSONObject reqPayload = new JSONObject();
-        reqPayload.put("fromUserId", USER_A);
-        reqPayload.put("toUserId", USER_B);
-        postRequest("/friend/request", reqPayload);
+        // Seed 데이터에 이미 C -> A 친구 요청이 PENDING 상태로 있습니다.
 
-        // GET /api/friend/status
-        String statusResp = getRequest("/friend/status?userId=" + USER_A + "&friendId=" + USER_B);
-        // 상태는 PENDING 이라는 문자열일 것임 (혹은 따옴표가 포함될 수 있음)
+        // GET /api/friend/status (C 입장에서 A 상태 확인)
+        String statusResp = getRequest("/friend/status?userId=" + USER_C + "&friendId=" + USER_A);
         assertTrue("친구 상태가 PENDING이어야 합니다.", statusResp.contains("PENDING"));
 
-        // GET /api/friend/pending-count/{userId}
-        String pendingResp = getRequest("/friend/pending-count/" + USER_B);
+        // GET /api/friend/pending-count/{userId} (A의 대기 인원 확인)
+        String pendingResp = getRequest("/friend/pending-count/" + USER_A);
         int pendingCount = Integer.parseInt(pendingResp.trim());
         assertTrue("대기 중인 요청이 1건 이상이어야 합니다.", pendingCount >= 1);
 
-        // 방금 보낸 요청의 Request ID 찾기
-        String reqListResp = getRequest("/friend/requests/" + USER_B);
+        // A가 받은 요청 리스트 조회하여 Request ID 찾기
+        String reqListResp = getRequest("/friend/requests/" + USER_A);
         JSONArray reqList = new JSONArray(reqListResp);
         for(int i = 0; i < reqList.length(); i++) {
             JSONObject obj = reqList.getJSONObject(i);
-            if (USER_A.equals(obj.optJSONObject("fromUser").optString("id"))) {
+            if (USER_C.equals(obj.optJSONObject("fromUser").optString("id"))) {
                 return obj.optLong("id");
             }
         }
@@ -120,25 +111,26 @@ public class FriendManagementE2EInstrumentedTest {
         // POST /api/friend/reject/{requestId}
         postRequest("/friend/reject/" + requestId, new JSONObject());
 
-        // 상태가 NONE이 되었는지 확인
-        String statusResp = getRequest("/friend/status?userId=" + USER_A + "&friendId=" + USER_B);
+        // 거절 후 C 입장에서 A의 상태가 NONE이 되었는지 확인
+        String statusResp = getRequest("/friend/status?userId=" + USER_C + "&friendId=" + USER_A);
         assertTrue("거절 후 상태가 PENDING이 아니어야 합니다.", !statusResp.contains("PENDING"));
     }
 
     private void testFriendListDatesAndDelete() throws Exception {
-        // USER_A -> USER_C 친구 맺기 (수락)
+        // 거절당했으므로 다시 C -> A 친구 요청
         JSONObject reqPayload = new JSONObject();
-        reqPayload.put("fromUserId", USER_A);
-        reqPayload.put("toUserId", USER_C);
+        reqPayload.put("fromUserId", USER_C);
+        reqPayload.put("toUserId", USER_A);
         postRequest("/friend/request", reqPayload);
 
-        String reqListResp = getRequest("/friend/requests/" + USER_C);
+        // A가 받은 요청 확인 후 수락
+        String reqListResp = getRequest("/friend/requests/" + USER_A);
         JSONArray reqList = new JSONArray(reqListResp);
         long requestId = reqList.getJSONObject(0).optLong("id");
         
         postRequest("/friend/accept/" + requestId, new JSONObject());
 
-        // GET /api/friend/list/{userId}
+        // GET /api/friend/list/{userId} (A의 목록에 C가 있는지 확인)
         String listResp = getRequest("/friend/list/" + USER_A);
         JSONArray listArr = new JSONArray(listResp);
         boolean hasC = false;
@@ -180,7 +172,7 @@ public class FriendManagementE2EInstrumentedTest {
         org.junit.Assert.assertTrue("달력 마커 응답에 Record 객체가 올바르게 포함되어야 합니다.", foundRecord);
         org.junit.Assert.assertTrue("달력 마커 응답에 Plan 객체가 올바르게 포함되어야 합니다.", foundPlan);
 
-        // DELETE /api/friend/delete
+        // DELETE /api/friend/delete (A가 C를 삭제)
         deleteRequest("/friend/delete?userId=" + USER_A + "&friendId=" + USER_C);
 
         // 리스트 재확인 (삭제됨)

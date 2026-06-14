@@ -70,17 +70,7 @@ public class TravelFlowE2EInstrumentedTest {
     }
 
     private void setupTestUsers() {
-        try {
-            JSONObject regA = new JSONObject();
-            regA.put("id", "test_user_flow");
-            regA.put("nickname", "FlowUser");
-            postRequest("/user/register", regA);
-
-            JSONObject regB = new JSONObject();
-            regB.put("id", "test_friend_flow");
-            regB.put("nickname", "FlowFriend");
-            postRequest("/user/register", regB);
-        } catch (Exception ignored) { }
+        // Seed 데이터가 존재하므로 유저 생성(register) 단계를 생략합니다.
     }
 
     private JSONObject testFallbackRecommend() throws Exception {
@@ -104,12 +94,12 @@ public class TravelFlowE2EInstrumentedTest {
     private void testSavePlanDuplicateUpdate(JSONObject planResp) throws Exception {
         String testDate = "2026-06-20";
         // 첫 번째 저장 (date: 2026-06-20)
-        String url = "/travel/plan/save?userId=test_user_flow&date=" + testDate;
+        String url = "/travel/plan/save?userId=seed_user_A&date=" + testDate;
         postRequest(url, planResp);
 
         // 동일 날짜에 실제 기록(Record: isPlan=false) 저장 (Double Storage 모사)
         JSONObject recordPayload = new JSONObject();
-        recordPayload.put("userId", "test_user_flow");
+        recordPayload.put("userId", "seed_user_A");
         recordPayload.put("date", testDate);
         recordPayload.put("timeSlot", "evening");
         recordPayload.put("content", "도쿄 도착해서 숙소 체크인 완료!");
@@ -121,9 +111,9 @@ public class TravelFlowE2EInstrumentedTest {
         planResp.put("trip_title", "업데이트된 도쿄 여행 일정");
         postRequest(url, planResp);
 
-        // GET /diary/test_user_flow 를 호출해서 날짜 2026-06-20가 2개인지, 
+        // GET /diary/seed_user_A 를 호출해서 날짜 2026-06-20가 2개인지, 
         // 계획 제목이 업데이트된 내용인지 검증
-        String readResp = getRequest("/diary/test_user_flow");
+        String readResp = getRequest("/diary/seed_user_A");
         JSONArray diaries = new JSONArray(readResp);
         
         int count = 0;
@@ -151,7 +141,7 @@ public class TravelFlowE2EInstrumentedTest {
     private void testTravelCompletionRecord() throws Exception {
         // 역방향: PlaceDto 정보를 기반으로 실제 Diary(방문 완료 기록) 생성
         JSONObject diaryPayload = new JSONObject();
-        diaryPayload.put("userId", "test_user_flow");
+        diaryPayload.put("userId", "seed_user_A");
         diaryPayload.put("date", "2026-06-21"); // 완료 기록은 다음 날로 모사
         diaryPayload.put("timeSlot", "lunch");
         diaryPayload.put("content", "도쿄 맛집 추천받아서 직접 왔는데 최고였다!");
@@ -175,12 +165,12 @@ public class TravelFlowE2EInstrumentedTest {
 
         // 1. 친구 관계 성립 모사 (이미 되어있을 수도 있으니 에러 무시)
         JSONObject req = new JSONObject();
-        req.put("fromUserId", "test_friend_flow");
-        req.put("toUserId", "test_user_flow");
+        req.put("fromUserId", "seed_user_B");
+        req.put("toUserId", "seed_user_A");
         try { postRequest("/friend/request", req); } catch(Exception ignored) {}
 
-        // 2. 친구(test_friend_flow)가 유저(test_user_flow)의 타임라인을 조회
-        String url = "/friend/timeline?myUserId=test_friend_flow&friendId=test_user_flow&date=2026-06-21";
+        // 2. 친구(seed_user_B)가 유저(seed_user_A)의 타임라인을 조회
+        String url = "/friend/timeline?myUserId=seed_user_B&friendId=seed_user_A&date=2026-06-21";
         String resp = getRequest(url);
         JSONArray arr = new JSONArray(resp);
         
@@ -201,14 +191,14 @@ public class TravelFlowE2EInstrumentedTest {
         assertNotNull("이전 단계에서 생성된 다이어리가 있어야 합니다.", createdDiaryId);
 
         JSONObject payload = new JSONObject();
-        payload.put("userId", "test_friend_flow");
+        payload.put("userId", "seed_user_B");
         payload.put("diaryId", createdDiaryId);
         
         // 좋아요(Heart) Toggle ON
         postRequest("/reaction/toggle", payload);
 
         // 타임라인 재조회를 통해 하트(좋아요) 개수가 반영되었는지 검증
-        String url = "/friend/timeline?myUserId=test_friend_flow&friendId=test_user_flow&date=2026-06-21";
+        String url = "/friend/timeline?myUserId=seed_user_B&friendId=seed_user_A&date=2026-06-21";
         String resp = getRequest(url);
         JSONArray arr = new JSONArray(resp);
         
