@@ -108,6 +108,7 @@ public class PlanListFragment extends Fragment {
                     android.content.Intent intent = new android.content.Intent(getActivity(), com.example.harudiary.activity.TravelPlanActivity.class);
                     intent.putExtra("plan", response.body());
                     intent.putExtra("isConfirmMode", true);
+                    intent.putExtra("diaryId", plan.getActivityId());
                     startActivity(intent);
                 } else {
                     if (isAdded() && getActivity() != null) {

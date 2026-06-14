@@ -32,6 +32,15 @@
             android:textStyle="bold"
             android:textColor="#333333"
             android:layout_marginStart="16dp"/>
+
+        <ImageButton
+            android:id="@+id/btn_delete_plan"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_delete"
+            android:contentDescription="삭제"
+            android:visibility="gone" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

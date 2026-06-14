@@ -40,6 +40,9 @@ public interface TravelApi {
             @Query("date") String date
     );
 
+    @retrofit2.http.DELETE("api/travel/plan/{diaryId}")
+    Call<Void> deletePlan(@retrofit2.http.Path("diaryId") Long diaryId);
+
     class DiaryRecommendRequest {
         public String targetDate;
         public int days;

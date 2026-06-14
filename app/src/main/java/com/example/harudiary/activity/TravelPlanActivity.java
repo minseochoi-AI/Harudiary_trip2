@@ -60,9 +60,14 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
         originalResponse = (TravelPlanResponse) getIntent().getSerializableExtra("plan");
         date = getIntent().getStringExtra("date");
         boolean isConfirmMode = getIntent().getBooleanExtra("isConfirmMode", false);
+        long diaryId = getIntent().getLongExtra("diaryId", -1);
+
+        ImageButton btnDelete = findViewById(R.id.btn_delete_plan);
 
         if (isConfirmMode) {
             btnSave.setVisibility(android.view.View.GONE);
+            btnDelete.setVisibility(View.VISIBLE);
+            btnDelete.setOnClickListener(v -> showDeleteConfirmDialog(diaryId));
         }
 
         if (originalResponse != null) {
@@ -241,6 +246,37 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 // silently handle
+            }
+        });
+    }
+
+    private void showDeleteConfirmDialog(long diaryId) {
+        if (diaryId == -1) return;
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("일정 삭제")
+                .setMessage("이 추천 일정을 삭제하시겠습니까?\n삭제된 일정은 복구할 수 없습니다.")
+                .setPositiveButton("삭제", (dialog, which) -> deletePlan(diaryId))
+                .setNegativeButton("취소", null)
+                .show();
+    }
+
+    private void deletePlan(long diaryId) {
+        TravelApi api = RetrofitClient.getClient().create(TravelApi.class);
+        api.deletePlan(diaryId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(TravelPlanActivity.this, "일정이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
+                    finish();
+                } else {
+                    Toast.makeText(TravelPlanActivity.this, "삭제 실패", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(TravelPlanActivity.this, "네트워크 오류", Toast.LENGTH_SHORT).show();
             }
         });
     }
