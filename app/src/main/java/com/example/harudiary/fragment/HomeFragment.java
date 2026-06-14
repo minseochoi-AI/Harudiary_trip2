@@ -386,7 +386,7 @@ public class HomeFragment extends Fragment {
                         ImageView ivPhoto = previewView.findViewById(R.id.iv_preview_photo);
                         
                         String timeStr = DateFormat.format("a h:mm", new Date(r.getTimestamp())).toString();
-                        if (r.getIsPlan()) timeStr = slotToKorean(r.getTimeSlot()) + " 일정";
+                        if (r.isPlan()) timeStr = slotToKorean(r.getTimeSlot()) + " 일정";
                         tvTime.setText(timeStr);
                         
                         if (r.getContent() != null && !r.getContent().isEmpty()) {
@@ -394,7 +394,7 @@ public class HomeFragment extends Fragment {
                         } else if (r.getAddress() != null && !r.getAddress().isEmpty()) {
                             tvContent.setText(r.getAddress());
                         } else {
-                            tvContent.setText(r.getIsPlan() ? "계획이 있습니다" : "기록이 있습니다");
+                            tvContent.setText(r.isPlan() ? "계획이 있습니다" : "기록이 있습니다");
                         }
                         
                         if (r.getPhotoUri() != null && !r.getPhotoUri().isEmpty()) {
