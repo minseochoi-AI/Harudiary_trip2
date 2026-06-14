@@ -24,13 +24,13 @@ import java.util.List;
 public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapter.ViewHolder> {
 
     private List<Record> records;
-    private final OnDateClickListener listener;
+    private final OnItemClickListener listener;
 
-    public interface OnDateClickListener {
-        void onDateClick(String date);
+    public interface OnItemClickListener {
+        void onItemClick(Record record);
     }
 
-    public ActivityListAdapter(List<Record> records, OnDateClickListener listener) {
+    public ActivityListAdapter(List<Record> records, OnItemClickListener listener) {
         this.records = records;
         this.listener = listener;
     }
@@ -81,11 +81,8 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
             vh.ivThumbnail.setImageURI(null);
         }
 
-        // 항목 클릭 시 상세(Daily)로 이동하도록 콜백
         vh.itemView.setOnClickListener(v -> {
-            if (listener != null && r.getDate() != null) {
-                listener.onDateClick(r.getDate());
-            }
+            if (listener != null) listener.onItemClick(r);
         });
     }
 

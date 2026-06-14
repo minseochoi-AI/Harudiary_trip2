@@ -246,11 +246,48 @@ public class DailyTimelineFragment extends Fragment {
             holder.btnCloseReaction.setOnClickListener(v -> hideReactionBar(holder.reactionBar));
 
             holder.cardRoot.setOnClickListener(v -> {
+                if (record.isPlan()) {
+                    if (record.getActivityId() == null) return;
+                    com.example.harudiary.api.TravelApi travelApi = com.example.harudiary.api.RetrofitClient.getClient().create(com.example.harudiary.api.TravelApi.class);
+                    travelApi.getPlanById(record.getActivityId()).enqueue(new retrofit2.Callback<com.example.harudiary.model.TravelPlanResponse>() {
+                        @Override
+                        public void onResponse(@NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull retrofit2.Response<com.example.harudiary.model.TravelPlanResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                if (!isAdded() || getActivity() == null) return;
+                                Intent intent = new Intent(requireContext(), com.example.harudiary.activity.TravelPlanActivity.class);
+                                intent.putExtra("plan", response.body());
+                                intent.putExtra("isConfirmMode", true);
+                                intent.putExtra("diaryId", record.getActivityId());
+                                intent.putExtra("date", record.getDate());
+                                startActivity(intent);
+                            } else {
+                                if (isAdded() && getActivity() != null) {
+                                    android.widget.Toast.makeText(requireContext(), "계획 상세를 불러오지 못했습니다.", android.widget.Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull Throwable t) {
+                            if (isAdded() && getActivity() != null) {
+                                android.widget.Toast.makeText(requireContext(), "네트워크 오류", android.widget.Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } else {
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).navigateToRecordEdit(record);
+                    }
+                }
+            });
+
+            holder.cardRoot.setOnLongClickListener(v -> {
                 if (holder.reactionBar.getVisibility() == View.VISIBLE) {
                     hideReactionBar(holder.reactionBar);
                 } else {
                     showReactionBar(holder.reactionBar);
                 }
+                return true;
             });
 
             loadReactionCounts(holder);
