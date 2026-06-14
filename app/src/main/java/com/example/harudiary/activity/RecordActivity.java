@@ -166,9 +166,22 @@ public class RecordActivity extends AppCompatActivity {
     }
 
     private void setAutoDatetime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA);
-        sdf.setTimeZone(KST);
-        tvAutoDatetime.setText(sdf.format(new Date()));
+        SimpleDateFormat displaySdf = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA);
+        displaySdf.setTimeZone(KST);
+        
+        if (diaryId != null && selectedDate != null) {
+            try {
+                SimpleDateFormat parseSdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+                parseSdf.setTimeZone(KST);
+                Date date = parseSdf.parse(selectedDate);
+                if (date != null) {
+                    tvAutoDatetime.setText(displaySdf.format(date));
+                    return;
+                }
+            } catch (Exception ignored) {}
+        }
+        
+        tvAutoDatetime.setText(displaySdf.format(new Date()));
     }
 
     private void setupPhotoButton() {

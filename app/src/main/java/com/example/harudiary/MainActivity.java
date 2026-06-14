@@ -203,6 +203,8 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("EXTRA_ADDRESS", record.getAddress());
         intent.putExtra("EXTRA_WEATHER", record.getWeather());
         intent.putExtra("EXTRA_TEMPERATURE", record.getTemperature());
+        intent.putExtra(RecordActivity.EXTRA_PREFILL_LAT, record.getLatitude());
+        intent.putExtra(RecordActivity.EXTRA_PREFILL_LNG, record.getLongitude());
         startActivity(intent);
     }
 
