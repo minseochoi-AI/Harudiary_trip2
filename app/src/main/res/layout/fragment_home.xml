@@ -297,6 +297,27 @@
                     android:layout_marginTop="12dp"
                     android:background="#4CAF50" />
 
+                <!-- ★ 타임라인 미리보기 영역 -->
+                <LinearLayout
+                    android:id="@+id/ll_timeline_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="12dp" />
+
+                <!-- 상세 타임라인 보기 버튼 -->
+                <TextView
+                    android:id="@+id/btn_view_details"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="상세 타임라인 보기 >"
+                    android:textColor="@color/primary_blue"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:background="?attr/selectableItemBackground" />
+
             </LinearLayout>
 
             <!-- ── DEAR 섹션 + 오늘의 질문 ───────────────── -->

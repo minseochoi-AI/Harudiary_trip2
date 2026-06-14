@@ -69,6 +69,11 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
         }
     }
 
+    public void setSelectedDay(int selectedDay) {
+        this.selectedDay = selectedDay;
+        notifyDataSetChanged();
+    }
+
     /** ★ 주간/월간 모드 전환 (애니메이션은 Fragment에서 처리) */
     public void setWeekMode(boolean weekMode) {
         this.weekMode = weekMode;
@@ -146,10 +151,40 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
 
         boolean hasDot = recordDates != null && recordDates.containsKey(dateStr);
         vh.vDot.setVisibility(hasDot ? View.VISIBLE : View.INVISIBLE);
+        vh.vRangeBg.setVisibility(View.INVISIBLE);
+
         if (hasDot) {
             Boolean isPlan = recordDates.get(dateStr);
             if (Boolean.TRUE.equals(isPlan)) {
                 vh.vDot.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFA726"))); // 주황색
+                
+                // ★ Range Highlighting 계산
+                boolean prevPlan = false;
+                boolean nextPlan = false;
+                Calendar cal = Calendar.getInstance();
+                cal.set(year, month, day);
+                cal.add(Calendar.DAY_OF_MONTH, -1);
+                String prevDate = String.format("%04d-%02d-%02d", cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
+                cal.add(Calendar.DAY_OF_MONTH, 2);
+                String nextDate = String.format("%04d-%02d-%02d", cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
+                
+                if (recordDates.containsKey(prevDate) && Boolean.TRUE.equals(recordDates.get(prevDate))) {
+                    prevPlan = true;
+                }
+                if (recordDates.containsKey(nextDate) && Boolean.TRUE.equals(recordDates.get(nextDate))) {
+                    nextPlan = true;
+                }
+                
+                vh.vRangeBg.setVisibility(View.VISIBLE);
+                if (prevPlan && nextPlan) {
+                    vh.vRangeBg.setBackgroundResource(R.drawable.bg_calendar_range_middle);
+                } else if (!prevPlan && nextPlan) {
+                    vh.vRangeBg.setBackgroundResource(R.drawable.bg_calendar_range_start);
+                } else if (prevPlan && !nextPlan) {
+                    vh.vRangeBg.setBackgroundResource(R.drawable.bg_calendar_range_end);
+                } else {
+                    vh.vRangeBg.setBackgroundResource(R.drawable.bg_calendar_range_single);
+                }
             } else {
                 vh.vDot.setBackgroundTintList(null); // 기본 테마색 (record)
             }
@@ -171,11 +206,12 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayVie
     }
 
     static class DayViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDay; View vDot;
+        TextView tvDay; View vDot; View vRangeBg;
         DayViewHolder(@NonNull View itemView) {
             super(itemView);
             tvDay = itemView.findViewById(R.id.tv_day);
             vDot = itemView.findViewById(R.id.v_dot);
+            vRangeBg = itemView.findViewById(R.id.v_range_bg);
         }
     }
 }

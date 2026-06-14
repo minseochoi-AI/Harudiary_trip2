@@ -69,8 +69,8 @@ public class HomeFragment extends Fragment {
 
     private TextView tvMonth, tvEmpty, tvStreak, tvMonthlyCount;
     private TextView tvTodayDay, tvLastRecordTime, tvDearTitle, tvDailyQuestion;
-    private LinearLayout llTodayThumbs, llTodayPhotos;
-    private TextView tvNoPhotos;
+    private LinearLayout llTodayThumbs, llTodayPhotos, llTimelinePreview;
+    private TextView tvNoPhotos, btnViewDetails;
     private RecyclerView rvCalendar, rvRecent;
     private CalendarAdapter calendarAdapter;
     private ActivityListAdapter activityListAdapter;
@@ -109,6 +109,8 @@ public class HomeFragment extends Fragment {
         tvDailyQuestion  = view.findViewById(R.id.tv_daily_question);
         llTodayThumbs    = view.findViewById(R.id.ll_today_thumbs);
         llTodayPhotos    = view.findViewById(R.id.ll_today_photos);
+        llTimelinePreview = view.findViewById(R.id.ll_timeline_preview);
+        btnViewDetails   = view.findViewById(R.id.btn_view_details);
         tvNoPhotos       = view.findViewById(R.id.tv_no_photos);
         rvCalendar       = view.findViewById(R.id.rv_calendar);
         rvRecent         = view.findViewById(R.id.rv_recent);
@@ -360,6 +362,50 @@ public class HomeFragment extends Fragment {
                 try { iv.setImageURI(Uri.parse(r.getPhotoUri())); } catch (Exception ignored) {}
                 llTodayThumbs.addView(iv);
             }
+
+            // ── 타임라인 미리보기 (최대 2개) ──
+            if (llTimelinePreview != null) {
+                llTimelinePreview.removeAllViews();
+                if (dayRecords.isEmpty()) {
+                    TextView tvEmpty = new TextView(requireContext());
+                    tvEmpty.setText("아직 기록이 없습니다. 새로운 하루를 기록해보세요!");
+                    tvEmpty.setTextColor(getResources().getColor(R.color.gray_hint));
+                    tvEmpty.setTextSize(13);
+                    tvEmpty.setGravity(android.view.Gravity.CENTER);
+                    tvEmpty.setPadding(0, 16, 0, 16);
+                    llTimelinePreview.addView(tvEmpty);
+                } else {
+                    int previewCount = Math.min(dayRecords.size(), 2);
+                    for (int i = 0; i < previewCount; i++) {
+                        Record r = dayRecords.get(i);
+                        View previewView = LayoutInflater.from(requireContext())
+                                .inflate(R.layout.item_timeline_preview, llTimelinePreview, false);
+                        
+                        TextView tvTime = previewView.findViewById(R.id.tv_preview_time);
+                        TextView tvContent = previewView.findViewById(R.id.tv_preview_content);
+                        ImageView ivPhoto = previewView.findViewById(R.id.iv_preview_photo);
+                        
+                        String timeStr = DateFormat.format("a h:mm", new Date(r.getTimestamp())).toString();
+                        if (r.getIsPlan()) timeStr = slotToKorean(r.getTimeSlot()) + " 일정";
+                        tvTime.setText(timeStr);
+                        
+                        if (r.getContent() != null && !r.getContent().isEmpty()) {
+                            tvContent.setText(r.getContent());
+                        } else if (r.getAddress() != null && !r.getAddress().isEmpty()) {
+                            tvContent.setText(r.getAddress());
+                        } else {
+                            tvContent.setText(r.getIsPlan() ? "계획이 있습니다" : "기록이 있습니다");
+                        }
+                        
+                        if (r.getPhotoUri() != null && !r.getPhotoUri().isEmpty()) {
+                            ivPhoto.setVisibility(View.VISIBLE);
+                            try { ivPhoto.setImageURI(Uri.parse(r.getPhotoUri())); } catch (Exception ignored) {}
+                        }
+                        
+                        llTimelinePreview.addView(previewView);
+                    }
+                }
+            }
         });
     }
 
@@ -507,8 +553,28 @@ public class HomeFragment extends Fragment {
     private void refreshFriendSection() { loadFriendBrowse(); updateBadge(); }
 
     private void onDateClick(String date) {
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).navigateToDaily(date);
+        // 날짜 파싱하여 viewDay, viewMonth, viewYear 업데이트
+        try {
+            String[] parts = date.split("-");
+            viewYear = Integer.parseInt(parts[0]);
+            viewMonth = Integer.parseInt(parts[1]) - 1;
+            viewDay = Integer.parseInt(parts[2]);
+            
+            selectedDay = viewDay;
+            if (currentMonth == viewMonth && currentYear == viewYear && calendarAdapter != null) {
+                calendarAdapter.setSelectedDay(selectedDay);
+            }
+        } catch (Exception e) {}
+        
+        loadTodaySection();
+        loadTodayPhotos();
+
+        if (btnViewDetails != null) {
+            btnViewDetails.setOnClickListener(v -> {
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).navigateToDaily(date);
+                }
+            });
         }
     }
 
