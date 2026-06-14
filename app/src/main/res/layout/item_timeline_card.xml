@@ -94,6 +94,18 @@
                 android:textSize="12sp"
                 android:maxLines="2"
                 android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/btn_generate_plan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✨ AI 여행계획 생성"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_primary_button"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:layout_marginStart="8dp" />
         </LinearLayout>
 
     </LinearLayout>

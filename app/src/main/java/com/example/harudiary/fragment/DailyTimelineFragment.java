@@ -14,19 +14,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.harudiary.R;
+import com.example.harudiary.activity.PlanInputActivity;
 import com.example.harudiary.activity.RecordActivity;
 import com.example.harudiary.model.Record;
 import com.example.harudiary.util.SessionManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import android.widget.Button;
-import android.widget.Toast;
 import com.example.harudiary.api.RetrofitClient;
 import com.example.harudiary.api.DiaryApi;
 
@@ -34,22 +34,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * DailyTimelineFragment — 하루 타임라인 (내 기록)
- * ★ 카드 클릭 시 친구들이 남긴 하트·댓글 정보 표시
- */
 public class DailyTimelineFragment extends Fragment {
 
     private static final String ARG_DATE = "date";
-
     private String date;
     private String userId;
-    private LayoutInflater cachedInflater;
 
-    private TextView  tvMorningTime, tvLunchTime, tvEveningTime, tvOtherTime;
-    private LinearLayout flMorning, flLunch, flEvening, flOther;
-    private View sectionOther;
-    
+    private RecyclerView rvTimeline;
+    private TextView tvEmpty;
+    private TimelineAdapter adapter;
 
     public static DailyTimelineFragment newInstance(String date) {
         DailyTimelineFragment f = new DailyTimelineFragment();
@@ -64,22 +57,16 @@ public class DailyTimelineFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_daily_timeline, container, false);
-        cachedInflater = inflater;
 
-        date        = getArguments() != null ? getArguments().getString(ARG_DATE, "") : "";
-        SessionManager sm = new SessionManager(requireContext());
-        userId = sm.getUserId();
+        date = getArguments() != null ? getArguments().getString(ARG_DATE, "") : "";
+        userId = new SessionManager(requireContext()).getUserId();
 
-        tvMorningTime = view.findViewById(R.id.tv_morning_time);
-        tvLunchTime   = view.findViewById(R.id.tv_lunch_time);
-        tvEveningTime = view.findViewById(R.id.tv_evening_time);
-        tvOtherTime   = view.findViewById(R.id.tv_other_time);
-        flMorning     = view.findViewById(R.id.fl_morning);
-        flLunch       = view.findViewById(R.id.fl_lunch);
-        flEvening     = view.findViewById(R.id.fl_evening);
-        flOther       = view.findViewById(R.id.fl_other);
-        sectionOther  = view.findViewById(R.id.section_other);
+        rvTimeline = view.findViewById(R.id.rv_timeline);
+        tvEmpty = view.findViewById(R.id.tv_empty);
 
+        rvTimeline.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new TimelineAdapter();
+        rvTimeline.setAdapter(adapter);
 
         loadAndBind();
         return view;
@@ -88,10 +75,8 @@ public class DailyTimelineFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (flMorning != null) loadAndBind();
+        if (adapter != null) loadAndBind();
     }
-
-    // ── 데이터 바인딩 ────────────────────────────────────────────
 
     private void loadAndBind() {
         DiaryApi diaryApi = RetrofitClient.getClient().create(DiaryApi.class);
@@ -113,33 +98,9 @@ public class DailyTimelineFragment extends Fragment {
     }
 
     private void processRecords(List<Record> records) {
-        List<Record> morningList = new ArrayList<>();
-        List<Record> lunchList   = new ArrayList<>();
-        List<Record> eveningList = new ArrayList<>();
-        List<Record> otherList   = new ArrayList<>();
-
-        for (Record r : records) {
-            String slot = r.getTimeSlot();
-            if ("morning".equals(slot))      morningList.add(r);
-            else if ("lunch".equals(slot))   lunchList.add(r);
-            else if ("evening".equals(slot)) eveningList.add(r);
-            else                             otherList.add(r);
-        }
-
-        filterPlansIfActualExists(morningList);
-        filterPlansIfActualExists(lunchList);
-        filterPlansIfActualExists(eveningList);
-        filterPlansIfActualExists(otherList);
-
-        bindSlot(flMorning, tvMorningTime, morningList, "morning");
-        bindSlot(flLunch,   tvLunchTime,   lunchList,   "lunch");
-        bindSlot(flEvening, tvEveningTime, eveningList, "evening");
-        bindOtherSlot(otherList);
-    }
-
-    private void filterPlansIfActualExists(List<Record> slotList) {
+        // 필터링: plan과 실제 기록이 중복될 경우, 실제 기록 우선
         boolean hasActual = false;
-        for (Record r : slotList) {
+        for (Record r : records) {
             if (!r.isPlan()) {
                 hasActual = true;
                 break;
@@ -147,242 +108,206 @@ public class DailyTimelineFragment extends Fragment {
         }
         if (hasActual) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                slotList.removeIf(Record::isPlan);
+                records.removeIf(Record::isPlan);
             } else {
-                java.util.Iterator<Record> it = slotList.iterator();
+                java.util.Iterator<Record> it = records.iterator();
                 while (it.hasNext()) {
-                    if (it.next().isPlan()) {
-                        it.remove();
-                    }
+                    if (it.next().isPlan()) it.remove();
                 }
             }
         }
-    }
 
-    private void bindSlot(LinearLayout container, TextView tvTime,
-                          List<Record> records, String slot) {
-        container.removeAllViews();
+        // 시간순(오름차순) 정렬
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            records.sort((r1, r2) -> Long.compare(r1.getTimestamp(), r2.getTimestamp()));
+        } else {
+            java.util.Collections.sort(records, (r1, r2) -> Long.compare(r1.getTimestamp(), r2.getTimestamp()));
+        }
+
         if (records.isEmpty()) {
-            showEmptyCard(container, tvTime, slot);
+            rvTimeline.setVisibility(View.GONE);
+            tvEmpty.setVisibility(View.VISIBLE);
         } else {
-            tvTime.setText(DateFormat.format("HH:mm",
-                    new Date(records.get(0).getTimestamp())).toString());
-            for (Record r : records) {
-                container.addView(buildActivityCard(container, r));
-            }
-            addPlusButton(container, slot);
+            rvTimeline.setVisibility(View.VISIBLE);
+            tvEmpty.setVisibility(View.GONE);
+            adapter.setRecords(records);
         }
     }
 
-    private void bindOtherSlot(List<Record> otherList) {
-        if (sectionOther == null) return;
-        if (otherList.isEmpty()) {
-            sectionOther.setVisibility(View.GONE);
-        } else {
-            sectionOther.setVisibility(View.VISIBLE);
-            flOther.removeAllViews();
-            tvOtherTime.setText(DateFormat.format("HH:mm",
-                    new Date(otherList.get(0).getTimestamp())).toString());
-            for (Record r : otherList) {
-                flOther.addView(buildActivityCard(flOther, r));
-            }
-            addPlusButton(flOther, null);
-        }
-    }
+    private class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHolder> {
+        private List<Record> records = new ArrayList<>();
 
-    // ── 카드 빌드 ─────────────────────────────────────────────────
-
-    private View buildActivityCard(LinearLayout parent, Record record) {
-        View card = cachedInflater.inflate(R.layout.item_timeline_card, parent, false);
-
-        // 사진
-        ImageView ivPhoto = card.findViewById(R.id.iv_photo);
-        if (record.getPhotoUri() != null && !record.getPhotoUri().isEmpty()) {
-            try {
-                ivPhoto.setImageURI(Uri.parse(record.getPhotoUri()));
-                ivPhoto.setVisibility(View.VISIBLE);
-            } catch (Exception ignored) {
-                ivPhoto.setVisibility(View.GONE);
-            }
-        } else {
-            ivPhoto.setVisibility(View.GONE);
+        public void setRecords(List<Record> newRecords) {
+            this.records = newRecords;
+            notifyDataSetChanged();
         }
 
-        // 시각
-        TextView tvCardTime = card.findViewById(R.id.tv_card_time);
-        if (tvCardTime != null) tvCardTime.setText("🕐 " +
-                DateFormat.format("HH:mm", new Date(record.getTimestamp())));
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_timeline_card, parent, false);
+            return new ViewHolder(view);
+        }
 
-        // 날씨
-        TextView tvCardWeather = card.findViewById(R.id.tv_card_weather);
-        if (tvCardWeather != null) {
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            Record record = records.get(position);
+
+            // 사진
+            if (record.getPhotoUri() != null && !record.getPhotoUri().isEmpty()) {
+                try {
+                    holder.ivPhoto.setImageURI(Uri.parse(record.getPhotoUri()));
+                    holder.ivPhoto.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                    holder.ivPhoto.setVisibility(View.GONE);
+                }
+            } else {
+                holder.ivPhoto.setVisibility(View.GONE);
+            }
+
+            // 시각
+            holder.tvCardTime.setText("🕐 " + DateFormat.format("HH:mm", new Date(record.getTimestamp())));
+
+            // 날씨
             String w = record.getWeather();
             if (w != null && !w.isEmpty()) {
-                tvCardWeather.setText(weatherToEmoji(w) + " " + (int) record.getTemperature() + "°");
-                tvCardWeather.setVisibility(View.VISIBLE);
+                holder.tvCardWeather.setText(weatherToEmoji(w) + " " + (int) record.getTemperature() + "°");
+                holder.tvCardWeather.setVisibility(View.VISIBLE);
             } else {
-                tvCardWeather.setVisibility(View.GONE);
+                holder.tvCardWeather.setVisibility(View.GONE);
             }
+
+            // 내용, 별점, 주소
+            holder.tvContent.setText(record.getContent() != null ? record.getContent() : "");
+            holder.tvRating.setText(buildStars(record.getRating()));
+            String addr = record.getAddress();
+            holder.tvLocation.setText((addr != null && !addr.isEmpty()) ? "📍 " + addr : "");
+
+            // 계획 배지
+            if (record.isPlan()) {
+                holder.tvPlanBadge.setVisibility(View.VISIBLE);
+                holder.cardRoot.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFF3E0")));
+            } else {
+                holder.tvPlanBadge.setVisibility(View.GONE);
+                holder.cardRoot.setBackgroundTintList(null);
+            }
+
+            // AI 추천 버튼
+            holder.btnGeneratePlan.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), PlanInputActivity.class);
+                intent.putExtra(PlanInputActivity.EXTRA_DATE, date);
+                if (record.getContent() != null && !record.getContent().isEmpty()) {
+                    intent.putExtra("EXTRA_CONTENT", record.getContent());
+                }
+                startActivity(intent);
+            });
+
+            // 리액션 바 설정
+            setupReactionBar(holder, record);
         }
 
-        // 내용 · 별점 · 주소
-        ((TextView) card.findViewById(R.id.tv_content))
-                .setText(record.getContent() != null ? record.getContent() : "");
-        ((TextView) card.findViewById(R.id.tv_rating)).setText(buildStars(record.getRating()));
-        String addr = record.getAddress();
-        ((TextView) card.findViewById(R.id.tv_location))
-                .setText((addr != null && !addr.isEmpty()) ? "📍 " + addr : "");
-
-        // ★ 리액션 바 설정 (친구들이 남긴 하트·댓글)
-        setupReactionBar(card, record);
-
-        // ★ 계획 시각적 차별화
-        if (record.isPlan()) {
-            card.findViewById(R.id.tv_plan_badge).setVisibility(View.VISIBLE);
-            card.findViewById(R.id.card_root).setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFF3E0"))); // 주황색 톤
+        @Override
+        public int getItemCount() {
+            return records.size();
         }
 
-        return card;
-    }
+        private void setupReactionBar(ViewHolder holder, Record record) {
+            Long activityId = record.getActivityId();
 
-    /**
-     * ★ 리액션 바 — 내 기록에 친구들이 남긴 반응 조회
-     *  - 카드 클릭 → 리액션 바 슬라이드 토글
-     *  - 하트 수·댓글 수 표시 (내 기록이므로 집계만 보여줌)
-     *  - 댓글 버튼 클릭 → CommentBottomSheetFragment 오픈
-     */
-    private void setupReactionBar(View card, Record record) {
-        Long activityId = record.getActivityId();
+            holder.reactionBar.setClickable(true);
+            holder.reactionBar.setOnClickListener(v -> {});
 
-        LinearLayout reactionBar  = card.findViewById(R.id.reaction_bar);
-        TextView tvHeartIcon      = card.findViewById(R.id.tv_heart_icon);
-        TextView tvHeartCount     = card.findViewById(R.id.tv_heart_count);
-        TextView tvCommentCount   = card.findViewById(R.id.tv_comment_count);
-        LinearLayout btnHeart     = card.findViewById(R.id.btn_heart);
-        LinearLayout btnComment   = card.findViewById(R.id.btn_comment);
-        TextView btnClose         = card.findViewById(R.id.btn_close_reaction);
+            holder.tvHeartIcon.setText("❤️");
+            holder.btnHeart.setClickable(false);
 
-        if (reactionBar == null) return;
-
-        // 리액션 바가 클릭 이벤트를 소비 → 카드 토글 리스너로 전파 방지
-        reactionBar.setClickable(true);
-        reactionBar.setOnClickListener(v -> { /* 이벤트 소비 */ });
-
-        // 내 기록은 자신이 하트를 남길 수 없으므로 하트 아이콘은 집계 표시 전용
-        tvHeartIcon.setText("❤️");
-        if (btnHeart != null) btnHeart.setClickable(false); // 터치 비활성
-
-        // 댓글 버튼 → 바텀 시트 오픈
-        if (btnComment != null) {
-            btnComment.setClickable(true);
-            btnComment.setOnClickListener(v -> {
+            holder.btnComment.setClickable(true);
+            holder.btnComment.setOnClickListener(v -> {
                 if (!isAdded()) return;
                 try {
-                    CommentBottomSheetFragment sheet =
-                            CommentBottomSheetFragment.newInstance(activityId);
-                    sheet.setOnCommentChangedListener(() ->
-                            loadReactionCounts(activityId, reactionBar,
-                                    tvHeartCount, tvCommentCount));
+                    CommentBottomSheetFragment sheet = CommentBottomSheetFragment.newInstance(activityId);
+                    sheet.setOnCommentChangedListener(() -> loadReactionCounts(holder));
                     sheet.show(getChildFragmentManager(), "comments_" + activityId);
-                } catch (IllegalStateException e) {
-                    android.util.Log.e("DailyTimeline", "comment sheet error", e);
+                } catch (Exception ignored) {}
+            });
+
+            holder.btnCloseReaction.setOnClickListener(v -> hideReactionBar(holder.reactionBar));
+
+            holder.cardRoot.setOnClickListener(v -> {
+                if (holder.reactionBar.getVisibility() == View.VISIBLE) {
+                    hideReactionBar(holder.reactionBar);
+                } else {
+                    showReactionBar(holder.reactionBar);
                 }
             });
+
+            loadReactionCounts(holder);
         }
 
-        // 닫기 버튼
-        if (btnClose != null) {
-            btnClose.setOnClickListener(v ->
-                    hideReactionBar(reactionBar));
-        }
+        private void loadReactionCounts(ViewHolder holder) {
+            int heartCount = 0;
+            int commentCount = 0;
+            holder.tvHeartCount.setText(String.valueOf(heartCount));
+            holder.tvCommentCount.setText(String.valueOf(commentCount));
 
-        // ★ 카드 클릭 → 리액션 바 토글
-        card.setOnClickListener(v -> {
-            if (reactionBar.getVisibility() == View.VISIBLE) {
-                hideReactionBar(reactionBar);
-            } else {
-                showReactionBar(reactionBar);
+            if ((heartCount > 0 || commentCount > 0) && holder.reactionBar.getVisibility() != View.VISIBLE) {
+                holder.reactionBar.setAlpha(1f);
+                holder.reactionBar.setScaleY(1f);
+                holder.reactionBar.setVisibility(View.VISIBLE);
             }
-        });
+        }
 
-        // 초기 카운트 로드 (반응이 있으면 자동 표시)
-        loadReactionCounts(activityId, reactionBar, tvHeartCount, tvCommentCount);
-    }
+        private void showReactionBar(View bar) {
+            bar.setVisibility(View.VISIBLE);
+            bar.setAlpha(0f);
+            bar.setScaleY(0.5f);
+            bar.setPivotY(0f);
+            bar.animate().alpha(1f).scaleY(1f).setDuration(200).start();
+        }
 
-    private void showReactionBar(LinearLayout bar) {
-        bar.setVisibility(View.VISIBLE);
-        bar.setAlpha(0f);
-        bar.setScaleY(0.5f);
-        bar.setPivotY(0f);
-        bar.animate().alpha(1f).scaleY(1f).setDuration(200).start();
-    }
+        private void hideReactionBar(View bar) {
+            bar.animate().alpha(0f).scaleY(0f).setDuration(180)
+                    .withEndAction(() -> bar.setVisibility(View.GONE)).start();
+        }
 
-    private void hideReactionBar(LinearLayout bar) {
-        bar.animate().alpha(0f).scaleY(0f).setDuration(180)
-                .withEndAction(() -> bar.setVisibility(View.GONE)).start();
-    }
+        class ViewHolder extends RecyclerView.ViewHolder {
+            LinearLayout cardRoot, reactionBar, btnHeart, btnComment;
+            ImageView ivPhoto;
+            TextView tvCardTime, tvCardWeather, tvContent, tvRating, tvLocation, tvPlanBadge;
+            TextView tvHeartIcon, tvHeartCount, tvCommentCount, btnCloseReaction, btnGeneratePlan;
 
-    /**
-     * 하트 수·댓글 수 비동기 로드
-     * 반응이 하나라도 있으면 리액션 바를 자동으로 노출
-     */
-    private void loadReactionCounts(Long activityId, LinearLayout reactionBar,
-                                     TextView tvHeartCount, TextView tvCommentCount) {
-        // TODO: 백엔드 API로 좋아요/댓글 수 가져오기 (현재는 N+1 문제 방지를 위해 임시로 0 처리)
-        int heartCount   = 0;
-        int commentCount = 0;
-        boolean hasReaction = heartCount > 0 || commentCount > 0;
+            ViewHolder(@NonNull View itemView) {
+                super(itemView);
+                cardRoot = itemView.findViewById(R.id.card_root);
+                ivPhoto = itemView.findViewById(R.id.iv_photo);
+                tvCardTime = itemView.findViewById(R.id.tv_card_time);
+                tvCardWeather = itemView.findViewById(R.id.tv_card_weather);
+                tvContent = itemView.findViewById(R.id.tv_content);
+                tvRating = itemView.findViewById(R.id.tv_rating);
+                tvLocation = itemView.findViewById(R.id.tv_location);
+                tvPlanBadge = itemView.findViewById(R.id.tv_plan_badge);
+                btnGeneratePlan = itemView.findViewById(R.id.btn_generate_plan);
 
-        if (tvHeartCount   != null) tvHeartCount.setText(String.valueOf(heartCount));
-        if (tvCommentCount != null) tvCommentCount.setText(String.valueOf(commentCount));
-        // 반응이 있으면 바 자동 노출
-        if (reactionBar != null && hasReaction
-                && reactionBar.getVisibility() != View.VISIBLE) {
-            reactionBar.setAlpha(1f);
-            reactionBar.setScaleY(1f);
-            reactionBar.setVisibility(View.VISIBLE);
+                reactionBar = itemView.findViewById(R.id.reaction_bar);
+                btnHeart = itemView.findViewById(R.id.btn_heart);
+                btnComment = itemView.findViewById(R.id.btn_comment);
+                tvHeartIcon = itemView.findViewById(R.id.tv_heart_icon);
+                tvHeartCount = itemView.findViewById(R.id.tv_heart_count);
+                tvCommentCount = itemView.findViewById(R.id.tv_comment_count);
+                btnCloseReaction = itemView.findViewById(R.id.btn_close_reaction);
+            }
         }
     }
-
-    // ── 빈 카드 / 추가 버튼 ────────────────────────────────────────
-
-    private void addPlusButton(LinearLayout container, @Nullable String slot) {
-        View empty = cachedInflater.inflate(R.layout.item_timeline_empty, container, false);
-        ((TextView) empty.findViewById(R.id.tv_add_label))
-                .setText("+ " + slotToKorean(slot) + " 기록 추가");
-        empty.setOnClickListener(v -> navigateToRecord(slot));
-        container.addView(empty);
-    }
-
-    private void showEmptyCard(LinearLayout container, TextView tvTime, String slot) {
-        View empty = cachedInflater.inflate(R.layout.item_timeline_empty, container, false);
-        ((TextView) empty.findViewById(R.id.tv_add_label))
-                .setText("+ " + slotToKorean(slot) + " 기록 추가");
-        tvTime.setText("--:--");
-        empty.setOnClickListener(v -> navigateToRecord(slot));
-        container.addView(empty);
-    }
-
-    private void navigateToRecord(@Nullable String slot) {
-        if (!isAdded()) return;
-        Intent intent = new Intent(requireContext(), RecordActivity.class);
-        intent.putExtra(RecordActivity.EXTRA_DATE, date);
-        if (slot != null) intent.putExtra(RecordActivity.EXTRA_SLOT, slot);
-        startActivity(intent);
-    }
-
-    // ── 유틸 ─────────────────────────────────────────────────────
 
     private static String weatherToEmoji(String weather) {
         if (weather == null) return "☀️";
         switch (weather) {
-            case "비":            return "🌧";
+            case "비": return "🌧";
             case "비/눈":
             case "빗방울눈날림": return "🌨";
             case "눈":
-            case "눈날림":        return "❄️";
-            case "빗방울":        return "🌦";
-            default:              return "☀️";
+            case "눈날림": return "❄️";
+            case "빗방울": return "🌦";
+            default: return "☀️";
         }
     }
 
@@ -392,12 +317,4 @@ public class DailyTimelineFragment extends Fragment {
         for (int i = 0; i < 5; i++) sb.append(i < full ? "★" : "☆");
         return sb.toString();
     }
-
-    private static String slotToKorean(@Nullable String slot) {
-        if ("morning".equals(slot)) return "아침";
-        if ("lunch".equals(slot))   return "점심";
-        if ("evening".equals(slot)) return "저녁";
-        return "기타";
-    }
-
 }

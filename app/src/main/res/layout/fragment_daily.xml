@@ -72,15 +72,6 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/btn_generate_plan"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:gravity="center"
-                android:text="✨"
-                android:textSize="17sp"
-                android:background="?attr/selectableItemBackgroundBorderless" />
-
-            <TextView
                 android:id="@+id/btn_delete_records"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
@@ -115,26 +106,8 @@
         android:layout_height="1dp"
         android:background="@color/gray_border" />
 
-    <!-- 탭 바: 타임라인 / 지도 -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:background="#FFFFFF"
-        app:tabIndicatorColor="#4CAF50"
-        app:tabRippleColor="@null"
-        app:tabSelectedTextColor="#4CAF50"
-        app:tabTextAppearance="@style/TabTextStyle"
-        app:tabTextColor="@color/gray_hint" />
-
-    <!-- 구분선 -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/gray_border" />
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/view_pager"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_container_timeline"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />

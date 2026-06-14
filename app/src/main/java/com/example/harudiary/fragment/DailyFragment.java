@@ -70,55 +70,22 @@ public class DailyFragment extends Fragment {
             startActivity(intent);
         });
 
-        // AI 여행 계획 버튼
-        view.findViewById(R.id.btn_generate_plan).setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), PlanInputActivity.class);
-            intent.putExtra(PlanInputActivity.EXTRA_DATE, date);
-            EditText etTitleObj = view.findViewById(R.id.et_day_title);
-            String title = etTitleObj.getText().toString();
-            if (!title.isEmpty()) {
-                intent.putExtra("EXTRA_CONTENT", title);
-            }
-            startActivity(intent);
-        });
-
         // ★ 하루 제목 입력
         EditText etTitle = view.findViewById(R.id.et_day_title);
-        
-        // Note: titleDAO removal - Titles should ideally be fetched from a server API.
-        // For now, removing local SQLite logic to fix build errors.
-        
         etTitle.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
             @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
             @Override public void afterTextChanged(Editable s) {
-                // String title = s.toString().trim();
-                // Save title logic should be implemented via API if needed.
             }
         });
 
-        // ViewPager2 + TabLayout
-        ViewPager2 viewPager = view.findViewById(R.id.view_pager);
-        viewPager.setAdapter(new DailyPagerAdapter(requireActivity(), date));
-
-        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) ->
-                tab.setText(position == 0 ? "🕐 타임라인" : "🗺 지도")
-        ).attach();
+        // 타임라인 프래그먼트 직접 로드 (단일 뷰 통합)
+        if (savedInstanceState == null) {
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container_timeline, DailyTimelineFragment.newInstance(date))
+                    .commit();
+        }
 
         return view;
-    }
-
-    private static class DailyPagerAdapter extends FragmentStateAdapter {
-        private final String date;
-        DailyPagerAdapter(@NonNull FragmentActivity activity, String date) {
-            super(activity); this.date = date;
-        }
-        @NonNull @Override
-        public Fragment createFragment(int position) {
-            return position == 0 ? DailyTimelineFragment.newInstance(date)
-                                 : DailyMapFragment.newInstance(date);
-        }
-        @Override public int getItemCount() { return 2; }
     }
 }

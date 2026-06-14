@@ -174,6 +174,7 @@ public class RecordActivity extends AppCompatActivity {
         payload.put("address", currentAddress);
         payload.put("weather", currentWeather);
         payload.put("temperature", currentTemperature);
+        payload.put("timestamp", System.currentTimeMillis());
 
         RetrofitClient.getInstance().create(DiaryApi.class).createDiary(payload).enqueue(new retrofit2.Callback<com.example.harudiary.model.Record>() {
             @Override
