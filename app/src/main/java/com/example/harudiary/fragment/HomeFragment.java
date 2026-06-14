@@ -569,12 +569,9 @@ public class HomeFragment extends Fragment {
         loadTodaySection();
         loadTodayPhotos();
 
-        if (btnViewDetails != null) {
-            btnViewDetails.setOnClickListener(v -> {
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).navigateToDaily(date);
-                }
-            });
+        // 사용자의 요청에 따라 달력 클릭 시 즉시 상세 일정(Daily) 화면으로 이동
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).navigateToDaily(date);
         }
     }
 
