@@ -29,6 +29,9 @@ public interface TravelApi {
     @POST("api/travel/recommend/diary")
     Call<TravelPlanResponse> recommendByDiary(@Body DiaryRecommendRequest request);
 
+    @GET("api/travel/plan/{diaryId}")
+    Call<TravelPlanResponse> getPlanById(@retrofit2.http.Path("diaryId") Long diaryId);
+
     @POST("api/travel/plan/save")
     Call<Void> savePlan(
             @Body TravelPlanResponse request, 
