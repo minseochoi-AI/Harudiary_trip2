@@ -29,5 +29,5 @@ public interface DiaryApi {
     Call<List<Record>> getActivitiesByDate(@Path("userId") String userId, @Path("date") String date);
 
     @retrofit2.http.DELETE("/api/diary/{diaryId}")
-    Call<Void> deleteDiary(@Path("diaryId") int diaryId);
+    Call<Void> deleteDiary(@Path("diaryId") Long diaryId, @retrofit2.http.Query("userId") String userId);
 }

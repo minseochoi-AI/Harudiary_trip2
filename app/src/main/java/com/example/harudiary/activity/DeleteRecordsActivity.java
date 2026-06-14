@@ -38,13 +38,11 @@ import java.util.Set;
  */
 public class DeleteRecordsActivity extends AppCompatActivity {
 
-    public static final String EXTRA_DATE = "extra_date";
-
-    private String date;
+       private String date;
     private String userIdStr;
 
     private List<Record>  records = new ArrayList<>();
-    private Set<Integer>  selectedIds = new HashSet<>();
+    private Set<Long>  selectedIds = new HashSet<>();
 
     private LinearLayout llRecordList;
     private TextView     btnDeleteSelected;
@@ -165,7 +163,7 @@ public class DeleteRecordsActivity extends AppCompatActivity {
         tvContent.setText(record.getContent() != null ? record.getContent() : "");
 
         // 체크박스 상태 반영
-        int id = record.getActivityId();
+        Long id = record.getActivityId();
         cb.setChecked(selectedIds.contains(id));
         cb.setOnCheckedChangeListener((btn, checked) -> {
             if (checked) selectedIds.add(id);
@@ -235,7 +233,7 @@ public class DeleteRecordsActivity extends AppCompatActivity {
             .setPositiveButton("전체 삭제", (d, w) -> {
                 DiaryApi diaryApi = RetrofitClient.getClient().create(DiaryApi.class);
                 for (Record r : records) {
-                    diaryApi.deleteDiary(r.getActivityId()).enqueue(new Callback<Void>() {
+                    diaryApi.deleteDiary(r.getActivityId(), userIdStr).enqueue(new Callback<Void>() {
                         @Override public void onResponse(@androidx.annotation.NonNull Call<Void> call, @androidx.annotation.NonNull Response<Void> response) {}
                         @Override public void onFailure(@androidx.annotation.NonNull Call<Void> call, @androidx.annotation.NonNull Throwable t) {}
                     });
@@ -257,8 +255,8 @@ public class DeleteRecordsActivity extends AppCompatActivity {
             .setMessage("선택한 기록 " + count + "개를 삭제하시겠습니까?")
             .setPositiveButton("삭제", (d, w) -> {
                 DiaryApi diaryApi = RetrofitClient.getClient().create(DiaryApi.class);
-                for (Integer id : selectedIds) {
-                    diaryApi.deleteDiary(id).enqueue(new Callback<Void>() {
+                for (Long id : selectedIds) {
+                    diaryApi.deleteDiary(id, userIdStr).enqueue(new Callback<Void>() {
                         @Override public void onResponse(@androidx.annotation.NonNull Call<Void> call, @androidx.annotation.NonNull Response<Void> response) {}
                         @Override public void onFailure(@androidx.annotation.NonNull Call<Void> call, @androidx.annotation.NonNull Throwable t) {}
                     });
