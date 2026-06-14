@@ -27,7 +27,7 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
     private final OnItemClickListener listener;
 
     public interface OnItemClickListener {
-        void onItemClick(String date); // "YYYY-MM-DD"
+        void onItemClick(Record record);
     }
 
     public ActivityListAdapter(List<Record> records, OnItemClickListener listener) {
@@ -82,7 +82,7 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
         }
 
         vh.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onItemClick(r.getDate());
+            if (listener != null) listener.onItemClick(r);
         });
     }
 

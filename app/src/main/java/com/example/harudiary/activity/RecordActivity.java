@@ -49,13 +49,16 @@ public class RecordActivity extends AppCompatActivity {
     private static final int REQ_PHOTO    = 1001;
     private static final int REQ_LOCATION = 1002;
 
-    private String selectedSlot = null;
     private String selectedDate;
-    private String selectedPhotoUri = null;
+    private String selectedSlot;
+    private String selectedPhotoUri;
+    private Long diaryId = null;
 
-    private double currentLat = 0, currentLng = 0;
-    private String currentAddress = "";
-    private String currentWeather = "";
+    // 환경/위치 정보
+    private double currentLat;
+    private double currentLng;
+    private String currentAddress;
+    private String currentWeather;
     private float  currentTemperature = 0f;
 
     private TextView tvAutoDatetime, tvAutoWeather, tvLocation, tvActivityTitle;
@@ -114,6 +117,49 @@ public class RecordActivity extends AppCompatActivity {
             currentAddress = prefillAddress;
             tvLocation.setText("📍 " + prefillAddress);
         }
+
+        diaryId = getIntent().hasExtra("EXTRA_DIARY_ID") ? getIntent().getLongExtra("EXTRA_DIARY_ID", -1) : null;
+        if (diaryId != null && diaryId == -1) diaryId = null;
+
+        if (getIntent().hasExtra("EXTRA_CONTENT")) {
+            String content = getIntent().getStringExtra("EXTRA_CONTENT");
+            if (content != null) etContent.setText(content);
+        }
+        
+        if (getIntent().hasExtra("EXTRA_PHOTO_URI")) {
+            String photoUri = getIntent().getStringExtra("EXTRA_PHOTO_URI");
+            if (photoUri != null && !photoUri.isEmpty()) {
+                selectedPhotoUri = photoUri;
+                try {
+                    ivPhoto.setImageURI(Uri.parse(photoUri));
+                    layoutPhotoContainer.setVisibility(View.VISIBLE);
+                    btnAddPhoto.setVisibility(View.GONE);
+                } catch (Exception ignored) {}
+            }
+        }
+        
+        if (getIntent().hasExtra("EXTRA_ADDRESS")) {
+            String addr = getIntent().getStringExtra("EXTRA_ADDRESS");
+            if (addr != null && !addr.isEmpty()) {
+                currentAddress = addr;
+                tvLocation.setText("📍 " + addr);
+            }
+        }
+        
+        if (getIntent().hasExtra("EXTRA_WEATHER")) {
+            String weather = getIntent().getStringExtra("EXTRA_WEATHER");
+            if (weather != null && !weather.isEmpty()) {
+                currentWeather = weather;
+            }
+        }
+        
+        if (getIntent().hasExtra("EXTRA_TEMPERATURE")) {
+            currentTemperature = getIntent().getFloatExtra("EXTRA_TEMPERATURE", 0);
+        }
+        
+        if (currentWeather != null) {
+            tvAutoWeather.setText(currentWeather + " " + currentTemperature + "℃");
+        }
         
         currentLat = getIntent().getDoubleExtra(EXTRA_PREFILL_LAT, 0);
         currentLng = getIntent().getDoubleExtra(EXTRA_PREFILL_LNG, 0);
@@ -163,6 +209,9 @@ public class RecordActivity extends AppCompatActivity {
         String slot = (selectedSlot != null) ? selectedSlot : getAutoTimeSlot();
 
         java.util.Map<String, Object> payload = new java.util.HashMap<>();
+        if (diaryId != null) {
+            payload.put("id", diaryId);
+        }
         payload.put("userId", userId);
         payload.put("date", selectedDate);
         payload.put("timeSlot", slot);

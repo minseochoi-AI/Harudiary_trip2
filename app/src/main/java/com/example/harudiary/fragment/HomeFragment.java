@@ -208,8 +208,8 @@ public class HomeFragment extends Fragment {
                 java.util.Map<String, Boolean> recordDates = new java.util.HashMap<>();
                 if (response.isSuccessful() && response.body() != null) {
                     for (com.example.harudiary.model.DiaryDateDto dto : response.body()) {
-                        // If record (false) already exists, don't overwrite with plan (true)
-                        if (recordDates.containsKey(dto.getDate()) && !recordDates.get(dto.getDate()) && dto.getIsPlan()) {
+                        // If plan (true) already exists, don't overwrite with record (false)
+                        if (recordDates.containsKey(dto.getDate()) && recordDates.get(dto.getDate()) && !dto.getIsPlan()) {
                             continue;
                         }
                         recordDates.put(dto.getDate(), dto.getIsPlan());

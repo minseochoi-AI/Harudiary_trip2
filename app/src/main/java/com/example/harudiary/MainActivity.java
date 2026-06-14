@@ -192,6 +192,20 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
+    public void navigateToRecordEdit(com.example.harudiary.model.Record record) {
+        Intent intent = new Intent(this, RecordActivity.class);
+        intent.putExtra("EXTRA_DIARY_ID", record.getActivityId());
+        intent.putExtra(RecordActivity.EXTRA_DATE, record.getDate());
+        intent.putExtra(RecordActivity.EXTRA_SLOT, record.getTimeSlot());
+        intent.putExtra("EXTRA_CONTENT", record.getContent());
+        intent.putExtra("EXTRA_PHOTO_URI", record.getPhotoUri());
+        intent.putExtra("EXTRA_RATING", record.getRating());
+        intent.putExtra("EXTRA_ADDRESS", record.getAddress());
+        intent.putExtra("EXTRA_WEATHER", record.getWeather());
+        intent.putExtra("EXTRA_TEMPERATURE", record.getTemperature());
+        startActivity(intent);
+    }
+
     public void navigateToRecord() {
         startActivity(new Intent(this, RecordActivity.class));
     }

@@ -198,7 +198,7 @@ public class RecordListFragment extends Fragment {
 
     private void updateUI(List<Record> records) {
         if (adapter == null) {
-            adapter = new ActivityListAdapter(records, this::onDateClick);
+            adapter = new ActivityListAdapter(records, this::onRecordClick);
             rvRecords.setAdapter(adapter);
         } else {
             adapter.update(records);
@@ -215,9 +215,9 @@ public class RecordListFragment extends Fragment {
         }
     }
 
-    private void onDateClick(String date) {
+    private void onRecordClick(Record record) {
         if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).navigateToDaily(date);
+            ((MainActivity) getActivity()).navigateToRecordEdit(record);
         }
     }
 

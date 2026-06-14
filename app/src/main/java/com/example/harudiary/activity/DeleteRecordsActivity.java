@@ -100,6 +100,14 @@ public class DeleteRecordsActivity extends AppCompatActivity {
             @Override
             public void onResponse(@androidx.annotation.NonNull Call<List<Record>> call, @androidx.annotation.NonNull Response<List<Record>> response) {
                 records = (response.isSuccessful() && response.body() != null) ? response.body() : new ArrayList<>();
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                    records.removeIf(Record::isPlan);
+                } else {
+                    java.util.Iterator<Record> it = records.iterator();
+                    while (it.hasNext()) {
+                        if (it.next().isPlan()) it.remove();
+                    }
+                }
                 processRecords();
             }
 
