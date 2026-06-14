@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.harudiary.R;
+import com.example.harudiary.activity.RecordActivity;
 import com.example.harudiary.adapter.TravelPlanAdapter;
 import com.example.harudiary.api.RetrofitClient;
 import com.example.harudiary.api.TravelApi;

@@ -20,6 +20,7 @@ import com.example.harudiary.activity.RecordActivity;
 import com.example.harudiary.fragment.DailyFragment;
 import com.example.harudiary.fragment.FriendListFragment;
 import com.example.harudiary.fragment.HomeFragment;
+import com.example.harudiary.fragment.ListFragment;
 import com.example.harudiary.fragment.ProfileFragment;
 import com.example.harudiary.fragment.RecordListFragment;
 
