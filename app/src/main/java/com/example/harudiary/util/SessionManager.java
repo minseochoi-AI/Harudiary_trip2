@@ -34,12 +34,9 @@ public class SessionManager {
         return prefs.getString(KEY_USER_ID, "-1");
     }
 
-    public int getLoggedInUserId() {
-        try {
-            return Integer.parseInt(getUserId());
-        } catch (NumberFormatException e) {
-            return NO_USER;
-        }
+    public boolean isLoggedIn() {
+        String id = getUserId();
+        return id != null && !id.equals("-1") && !id.isEmpty();
     }
 
     public String getLoggedInUserName() { return prefs.getString(KEY_USER_NAME, ""); }
@@ -57,7 +54,7 @@ public class SessionManager {
         return prefs.getString(KEY_PROFILE_URI, null);
     }
 
-    public boolean isLoggedIn() { return getLoggedInUserId() != NO_USER; }
+
 
     public void logout() {
         prefs.edit()

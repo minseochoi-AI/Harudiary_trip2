@@ -56,8 +56,7 @@ public class DeleteRecordsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_delete_records);
 
         date   = getIntent().getStringExtra(EXTRA_DATE);
-        int userIdInt = new SessionManager(this).getLoggedInUserId();
-        userIdStr = String.valueOf(userIdInt);
+        userIdStr = new SessionManager(this).getUserId();
 
         llRecordList     = findViewById(R.id.ll_record_list);
         btnDeleteSelected = findViewById(R.id.btn_delete_selected);

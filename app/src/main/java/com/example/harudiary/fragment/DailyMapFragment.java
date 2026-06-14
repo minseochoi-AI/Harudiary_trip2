@@ -94,14 +94,13 @@ public class DailyMapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         String date   = getArguments() != null ? getArguments().getString(ARG_DATE, "") : "";
-        int    userId = new SessionManager(requireContext()).getLoggedInUserId();
-        String userIdStr = String.valueOf(userId);
+        String userId = new SessionManager(requireContext()).getUserId();
 
         tvEmpty = view.findViewById(R.id.tv_map_empty);
         mapView = view.findViewById(R.id.mapView);
 
         DiaryApi diaryApi = RetrofitClient.getClient().create(DiaryApi.class);
-        diaryApi.getActivitiesByDate(userIdStr, date).enqueue(new Callback<List<Record>>() {
+        diaryApi.getActivitiesByDate(userId, date).enqueue(new Callback<List<Record>>() {
             @Override
             public void onResponse(@NonNull Call<List<Record>> call, @NonNull Response<List<Record>> response) {
                 List<Record> records = (response.isSuccessful() && response.body() != null) ? response.body() : new ArrayList<>();

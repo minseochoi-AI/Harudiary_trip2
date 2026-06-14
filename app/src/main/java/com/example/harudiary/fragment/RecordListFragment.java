@@ -57,8 +57,7 @@ public class RecordListFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_record_list, container, false);
 
-        int userIdInt = new SessionManager(requireContext()).getLoggedInUserId();
-        userIdStr = String.valueOf(userIdInt);
+        userIdStr = new SessionManager(requireContext()).getUserId();
 
         rvRecords       = view.findViewById(R.id.rv_all_records);
         tvEmpty         = view.findViewById(R.id.tv_empty_records);
@@ -149,8 +148,17 @@ public class RecordListFragment extends Fragment {
             public void onResponse(@NonNull Call<List<Record>> call, @NonNull Response<List<Record>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     allRecords = response.body();
-                    // 내림차순 정렬 (최신순)
-                    allRecords.sort((r1, r2) -> Long.compare(r2.getTimestamp(), r1.getTimestamp()));
+                    // 내림차순 정렬 (날짜 -> activityId)
+                    allRecords.sort((r1, r2) -> {
+                        int dateCmp = r2.getDate().compareTo(r1.getDate());
+                        if (dateCmp != 0) return dateCmp;
+                        Long id1 = r1.getActivityId();
+                        Long id2 = r2.getActivityId();
+                        if (id1 == null && id2 == null) return 0;
+                        if (id1 == null) return 1;
+                        if (id2 == null) return -1;
+                        return Long.compare(id2, id1);
+                    });
                 } else {
                     allRecords = new ArrayList<>();
                 }

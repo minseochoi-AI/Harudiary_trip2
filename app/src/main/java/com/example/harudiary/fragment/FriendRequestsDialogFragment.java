@@ -60,7 +60,7 @@ public class FriendRequestsDialogFragment extends DialogFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_friend_requests, container, false);
 
-        userId = new SessionManager(requireContext()).getLoggedInUserId();
+        userId = new SessionManager(requireContext()).getUserId();
         friendApi = RetrofitClient.getClient().create(FriendApi.class);
 
         RecyclerView rvRequests = view.findViewById(R.id.rv_requests);

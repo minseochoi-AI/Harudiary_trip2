@@ -35,7 +35,7 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
 
     private static final String ARG_ACTIVITY_ID = "activity_id";
 
-    private int activityId;
+    private Long activityId;
     private String myUserId;
     private CommentApi commentApi;
     private CommentAdapter adapter;
@@ -44,10 +44,10 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
     public interface OnCommentChangedListener { void onChanged(); }
     private OnCommentChangedListener listener;
 
-    public static CommentBottomSheetFragment newInstance(int activityId) {
+    public static CommentBottomSheetFragment newInstance(Long activityId) {
         CommentBottomSheetFragment f = new CommentBottomSheetFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_ACTIVITY_ID, activityId);
+        args.putLong(ARG_ACTIVITY_ID, activityId);
         f.setArguments(args);
         return f;
     }
@@ -59,7 +59,7 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_comment_sheet, container, false);
 
-        activityId  = getArguments() != null ? getArguments().getInt(ARG_ACTIVITY_ID) : -1;
+        activityId  = getArguments() != null ? getArguments().getLong(ARG_ACTIVITY_ID) : -1L;
         myUserId    = new SessionManager(requireContext()).getUserId();
         commentApi  = RetrofitClient.getClient().create(CommentApi.class);
 

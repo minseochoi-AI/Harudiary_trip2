@@ -1,7 +1,10 @@
 package com.example.harudiary.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Record {
-    private int activityId;
+    @SerializedName("id")
+    private Long activityId;
     private String userId;
     private String date;       // YYYY-MM-DD
     private String timeSlot;   // morning / lunch / evening
@@ -18,8 +21,8 @@ public class Record {
 
     public Record() {}
 
-    public int getActivityId() { return activityId; }
-    public void setActivityId(int activityId) { this.activityId = activityId; }
+    public Long getActivityId() { return activityId; }
+    public void setActivityId(Long activityId) { this.activityId = activityId; }
 
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }

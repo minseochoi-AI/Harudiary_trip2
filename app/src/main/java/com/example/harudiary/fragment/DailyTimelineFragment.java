@@ -68,8 +68,7 @@ public class DailyTimelineFragment extends Fragment {
 
         date        = getArguments() != null ? getArguments().getString(ARG_DATE, "") : "";
         SessionManager sm = new SessionManager(requireContext());
-        int userIdInt = sm.getLoggedInUserId();
-        userId = String.valueOf(userIdInt);
+        userId = sm.getUserId();
 
         tvMorningTime = view.findViewById(R.id.tv_morning_time);
         tvLunchTime   = view.findViewById(R.id.tv_lunch_time);
@@ -253,7 +252,7 @@ public class DailyTimelineFragment extends Fragment {
      *  - 댓글 버튼 클릭 → CommentBottomSheetFragment 오픈
      */
     private void setupReactionBar(View card, Record record) {
-        int activityId = record.getActivityId();
+        Long activityId = record.getActivityId();
 
         LinearLayout reactionBar  = card.findViewById(R.id.reaction_bar);
         TextView tvHeartIcon      = card.findViewById(R.id.tv_heart_icon);
@@ -327,7 +326,7 @@ public class DailyTimelineFragment extends Fragment {
      * 하트 수·댓글 수 비동기 로드
      * 반응이 하나라도 있으면 리액션 바를 자동으로 노출
      */
-    private void loadReactionCounts(int activityId, LinearLayout reactionBar,
+    private void loadReactionCounts(Long activityId, LinearLayout reactionBar,
                                      TextView tvHeartCount, TextView tvCommentCount) {
         // TODO: 백엔드 API로 좋아요/댓글 수 가져오기 (현재는 N+1 문제 방지를 위해 임시로 0 처리)
         int heartCount   = 0;

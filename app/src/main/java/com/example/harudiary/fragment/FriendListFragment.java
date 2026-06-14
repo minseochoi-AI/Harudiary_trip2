@@ -45,7 +45,7 @@ public class FriendListFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_friend_list, container, false);
 
-        userId = new SessionManager(requireContext()).getLoggedInUserId();
+        String userId = new SessionManager(requireContext()).getUserId();
         friendApi = RetrofitClient.getClient().create(FriendApi.class);
 
         rvFriends      = view.findViewById(R.id.rv_friends);

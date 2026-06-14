@@ -88,8 +88,7 @@ public class HomeFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        int userIdInt = new SessionManager(requireContext()).getLoggedInUserId();
-        userIdStr = String.valueOf(userIdInt);
+        userIdStr = new SessionManager(requireContext()).getUserId();
 
         Calendar today = Calendar.getInstance();
         todayYear  = today.get(Calendar.YEAR);
