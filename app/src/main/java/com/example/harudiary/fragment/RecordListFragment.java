@@ -147,7 +147,16 @@ public class RecordListFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<List<Record>> call, @NonNull Response<List<Record>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    allRecords = response.body();
+                    List<Record> fetched = response.body();
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        fetched.removeIf(Record::isPlan);
+                    } else {
+                        java.util.Iterator<Record> it = fetched.iterator();
+                        while (it.hasNext()) {
+                            if (it.next().isPlan()) it.remove();
+                        }
+                    }
+                    allRecords = fetched;
                     // 내림차순 정렬 (날짜 -> activityId)
                     allRecords.sort((r1, r2) -> {
                         String d1 = r1.getDate() != null ? r1.getDate() : "";
