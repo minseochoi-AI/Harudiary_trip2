@@ -154,8 +154,8 @@ public class RecordActivity extends AppCompatActivity {
 
     private void saveRecord() {
         String content = etContent.getText().toString().trim();
-        if (content.isEmpty()) {
-            Toast.makeText(this, "활동 내용을 입력해주세요", Toast.LENGTH_SHORT).show();
+        if (content.isEmpty() && selectedPhotoUri == null) {
+            Toast.makeText(this, "활동 내용이나 사진을 하나 이상 입력해주세요", Toast.LENGTH_SHORT).show();
             return;
         }
 
