@@ -17,6 +17,7 @@ import com.example.harudiary.R;
 import com.example.harudiary.adapter.PlanListAdapter;
 import com.example.harudiary.api.DiaryApi;
 import com.example.harudiary.api.RetrofitClient;
+import com.example.harudiary.api.TravelApi;
 import com.example.harudiary.model.Record;
 import com.example.harudiary.util.SessionManager;
 
