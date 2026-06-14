@@ -208,9 +208,26 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
     public void onVisitComplete(PlaceDto place) {
         lastClickedPlace = place;
         Intent intent = new Intent(this, RecordActivity.class);
-        intent.putExtra(RecordActivity.EXTRA_PREFILL_CONTENT, "📍 " + place.getPlaceName() + " 방문");
+        intent.putExtra(RecordActivity.EXTRA_PREFILL_CONTENT, place.getPlaceName());
         intent.putExtra(RecordActivity.EXTRA_PREFILL_ADDRESS, place.getAddressName());
         
+        // Calculate date based on dayNumber
+        if (date != null && place.getDayNumber() > 0) {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.KOREA);
+                java.util.Date startDate = sdf.parse(date);
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.setTime(startDate);
+                cal.add(java.util.Calendar.DAY_OF_MONTH, place.getDayNumber() - 1);
+                intent.putExtra(RecordActivity.EXTRA_DATE, sdf.format(cal.getTime()));
+            } catch (java.text.ParseException e) {
+                // fallback to original date if parsing fails
+                intent.putExtra(RecordActivity.EXTRA_DATE, date);
+            }
+        } else {
+            intent.putExtra(RecordActivity.EXTRA_DATE, date);
+        }
+
         if (place.getY() != null && place.getX() != null) {
             try {
                 intent.putExtra(RecordActivity.EXTRA_PREFILL_LAT, Double.parseDouble(place.getY()));
@@ -237,6 +254,38 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
 
     private void savePlanSilently() {
         if (originalResponse == null) return;
+
+        // Reconstruct newDays from flattenedList
+        List<DayPlanDto> newDays = new ArrayList<>();
+        DayPlanDto currentDay = null;
+        int currentDayNumber = 1;
+
+        for (PlaceDto item : flattenedList) {
+            if ("HEADER".equals(item.getPlaceCategory())) {
+                if (currentDay != null && currentDay.getPlaces() != null && !currentDay.getPlaces().isEmpty()) {
+                    newDays.add(currentDay);
+                }
+                currentDayNumber = item.getDayNumber();
+                if (currentDayNumber <= 0) currentDayNumber = 1; // Fallback
+                currentDay = new DayPlanDto();
+                currentDay.setDayNumber(currentDayNumber);
+                currentDay.setPlaces(new ArrayList<>());
+            } else {
+                if (currentDay == null) {
+                    currentDay = new DayPlanDto();
+                    currentDay.setDayNumber(currentDayNumber);
+                    currentDay.setPlaces(new ArrayList<>());
+                }
+                item.setDayNumber(currentDayNumber);
+                currentDay.getPlaces().add(item);
+            }
+        }
+        if (currentDay != null && currentDay.getPlaces() != null && !currentDay.getPlaces().isEmpty()) {
+            newDays.add(currentDay);
+        }
+
+        originalResponse.setDays(newDays);
+
         TravelApi api = RetrofitClient.getClient().create(TravelApi.class);
         api.savePlan(originalResponse, userId, null, date).enqueue(new Callback<Void>() {
             @Override
