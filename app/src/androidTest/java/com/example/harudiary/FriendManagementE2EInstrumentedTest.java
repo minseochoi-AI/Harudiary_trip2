@@ -84,7 +84,11 @@ public class FriendManagementE2EInstrumentedTest {
     }
 
     private long testFriendRequestAndStatus() throws Exception {
-        // Seed 데이터에 이미 C -> A 친구 요청이 PENDING 상태로 있습니다.
+        // C가 A에게 친구 요청 (멱등성을 위해 명시적으로 매번 전송)
+        JSONObject reqPayload = new JSONObject();
+        reqPayload.put("fromUserId", USER_C);
+        reqPayload.put("toUserId", USER_A);
+        try { postRequest("/friend/request", reqPayload); } catch (Exception ignored) {}
 
         // GET /api/friend/status (C 입장에서 A 상태 확인)
         String statusResp = getRequest("/friend/status?userId=" + USER_C + "&friendId=" + USER_A);

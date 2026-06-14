@@ -114,7 +114,7 @@ public class PipelineE2EInstrumentedTest {
 
     private void testD5Timeline() throws Exception {
         int targetId = createDummyDiary("seed_user_B", "2026-06-07");
-        String resp = getRequest("/friend/timeline?myUserId=test_user_a&friendId=test_user_b&date=2026-06-07");
+        String resp = getRequest("/friend/timeline?myUserId=seed_user_A&friendId=seed_user_B&date=2026-06-07");
         JSONArray arr = new JSONArray(resp);
         assertTrue(arr.length() > 0);
         
