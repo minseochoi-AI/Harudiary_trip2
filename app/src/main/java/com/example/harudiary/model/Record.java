@@ -20,7 +20,12 @@ public class Record {
     private boolean isPlan;
     private int duration;
 
+    private String title;
+
     public Record() {}
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
     public Long getActivityId() { return activityId; }
     public void setActivityId(Long activityId) { this.activityId = activityId; }

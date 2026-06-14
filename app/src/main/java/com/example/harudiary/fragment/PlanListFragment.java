@@ -1,0 +1,103 @@
+package com.example.harudiary.fragment;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.harudiary.MainActivity;
+import com.example.harudiary.R;
+import com.example.harudiary.adapter.PlanListAdapter;
+import com.example.harudiary.api.DiaryApi;
+import com.example.harudiary.api.RetrofitClient;
+import com.example.harudiary.model.Record;
+import com.example.harudiary.util.SessionManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class PlanListFragment extends Fragment {
+
+    private RecyclerView rvPlans;
+    private TextView tvEmpty;
+    private PlanListAdapter adapter;
+    private String userIdStr;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_plan_list, container, false);
+
+        userIdStr = new SessionManager(requireContext()).getUserId();
+
+        rvPlans = view.findViewById(R.id.rv_plans);
+        tvEmpty = view.findViewById(R.id.tv_empty_plans);
+
+        rvPlans.setLayoutManager(new LinearLayoutManager(requireContext()));
+        
+        loadPlans();
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (userIdStr != null) {
+            loadPlans();
+        }
+    }
+
+    private void loadPlans() {
+        DiaryApi diaryApi = RetrofitClient.getClient().create(DiaryApi.class);
+        diaryApi.getPlans(userIdStr).enqueue(new Callback<List<Record>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Record>> call, @NonNull Response<List<Record>> response) {
+                List<Record> plans = new ArrayList<>();
+                if (response.isSuccessful() && response.body() != null) {
+                    plans = response.body();
+                }
+                updateUI(plans);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Record>> call, @NonNull Throwable t) {
+                updateUI(new ArrayList<>());
+            }
+        });
+    }
+
+    private void updateUI(List<Record> plans) {
+        if (!isAdded() || getActivity() == null) return;
+        requireActivity().runOnUiThread(() -> {
+            if (adapter == null) {
+                adapter = new PlanListAdapter(plans, this::onPlanClick);
+                rvPlans.setAdapter(adapter);
+            } else {
+                adapter.update(plans);
+            }
+
+            boolean empty = plans.isEmpty();
+            rvPlans.setVisibility(empty ? View.GONE : View.VISIBLE);
+            tvEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+        });
+    }
+
+    private void onPlanClick(String date) {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).navigateToDaily(date);
+        }
+    }
+}

@@ -16,6 +16,9 @@ public interface DiaryApi {
     @GET("/api/diary/{userId}")
     Call<List<Record>> getDiaries(@Path("userId") String userId);
 
+    @GET("/api/diary/plans/{userId}")
+    Call<List<Record>> getPlans(@Path("userId") String userId);
+
     @GET("/api/diary/{userId}/dates")
     Call<List<com.example.harudiary.model.DiaryDateDto>> getRecordDates(@Path("userId") String userId, @retrofit2.http.Query("yearMonth") String yearMonth);
 

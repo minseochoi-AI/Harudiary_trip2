@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
         androidx.fragment.app.Fragment fragment;
         switch (tab) {
-            case 1:  fragment = new RecordListFragment(); break;
+            case 1:  fragment = new ListFragment();       break;
             case 2:  fragment = new FriendListFragment(); break;
             case 3:  fragment = new ProfileFragment();    break;
             default: fragment = new HomeFragment();       break;
