@@ -7,6 +7,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -39,7 +41,19 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
     private TravelPlanResponse originalResponse;
     private String userId;
     private PlaceDto lastClickedPlace;
-    private static final int REQ_RECORD = 200;
+
+    private final ActivityResultLauncher<Intent> recordActivityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (lastClickedPlace != null) {
+                        lastClickedPlace.setVisited(true);
+                        adapter.notifyDataSetChanged();
+                        savePlanSilently(); // Save updated status to backend
+                    }
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -237,19 +251,7 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
             }
         }
         
-        startActivityForResult(intent, REQ_RECORD);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_RECORD && resultCode == RESULT_OK) {
-            if (lastClickedPlace != null) {
-                lastClickedPlace.setVisited(true);
-                adapter.notifyDataSetChanged();
-                savePlanSilently(); // Save updated status to backend
-            }
-        }
+        recordActivityLauncher.launch(intent);
     }
 
     private void savePlanSilently() {
