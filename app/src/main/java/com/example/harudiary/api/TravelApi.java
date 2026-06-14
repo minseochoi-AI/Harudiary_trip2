@@ -43,13 +43,15 @@ public interface TravelApi {
         public double lat;
         public double lng;
         public String diaryText;
+        public int placesPerDay;
 
-        public DiaryRecommendRequest(String targetDate, int days, double lat, double lng, String diaryText) {
+        public DiaryRecommendRequest(String targetDate, int days, double lat, double lng, String diaryText, int placesPerDay) {
             this.targetDate = targetDate;
             this.days = days;
             this.lat = lat;
             this.lng = lng;
             this.diaryText = diaryText;
+            this.placesPerDay = placesPerDay;
         }
     }
 }

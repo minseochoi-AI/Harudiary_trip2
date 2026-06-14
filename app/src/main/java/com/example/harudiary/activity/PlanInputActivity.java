@@ -7,6 +7,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.AlertDialog;
+import android.widget.ProgressBar;
+import android.widget.LinearLayout;
+import android.view.Gravity;
+import android.graphics.Color;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +37,8 @@ public class PlanInputActivity extends AppCompatActivity {
     private EditText etDestination;
     private EditText etContent;
     private TextView tvEndDate;
+    private com.google.android.material.slider.Slider sliderPlacesPerDay;
+    private AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +54,7 @@ public class PlanInputActivity extends AppCompatActivity {
         etDestination = findViewById(R.id.et_destination);
         etContent = findViewById(R.id.et_content);
         tvEndDate = findViewById(R.id.tv_end_date);
+        sliderPlacesPerDay = findViewById(R.id.slider_places_per_day);
 
         findViewById(R.id.btn_close).setOnClickListener(v -> finish());
 
@@ -63,6 +71,10 @@ public class PlanInputActivity extends AppCompatActivity {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
             sdf.setTimeZone(KST);
             selectedDate = sdf.format(new Date());
+        }
+        String prefillContent = getIntent().getStringExtra("EXTRA_CONTENT");
+        if (prefillContent != null && !prefillContent.isEmpty()) {
+            etContent.setText(prefillContent);
         }
     }
 
@@ -105,6 +117,7 @@ public class PlanInputActivity extends AppCompatActivity {
     private void generateTravelPlan() {
         String destination = etDestination.getText().toString().trim();
         String content = etContent.getText().toString().trim();
+        int placesPerDay = (int) sliderPlacesPerDay.getValue();
 
         if (destination.isEmpty()) {
             Toast.makeText(this, "목적지를 입력해주세요", Toast.LENGTH_SHORT).show();
@@ -119,15 +132,16 @@ public class PlanInputActivity extends AppCompatActivity {
         // 목적지를 content와 결합하여 AI에 명확히 전달
         String fullContent = "목적지: " + destination + ". 내용: " + content;
 
-        Toast.makeText(this, calculatedDays + "일 여행 일정 생성 중...", Toast.LENGTH_SHORT).show();
+        showLoadingDialog();
 
         TravelApi api = RetrofitClient.getClient().create(TravelApi.class);
         // GPS 좌표는 목적지 검색이므로 0, 0 전달
-        TravelApi.DiaryRecommendRequest req = new TravelApi.DiaryRecommendRequest(selectedDate, calculatedDays, 0, 0, fullContent);
+        TravelApi.DiaryRecommendRequest req = new TravelApi.DiaryRecommendRequest(selectedDate, calculatedDays, 0, 0, fullContent, placesPerDay);
 
         api.recommendByDiary(req).enqueue(new retrofit2.Callback<com.example.harudiary.model.TravelPlanResponse>() {
             @Override
             public void onResponse(@NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull retrofit2.Response<com.example.harudiary.model.TravelPlanResponse> response) {
+                hideLoadingDialog();
                 if (response.isSuccessful() && response.body() != null) {
                     if (response.body().getDays() == null || response.body().getDays().isEmpty() || "지역을 알 수 없습니다".equals(response.body().getTripTitle())) {
                         runOnUiThread(() -> Toast.makeText(PlanInputActivity.this, "정확한 지역명을 포함해서 다시 작성해 주세요", Toast.LENGTH_LONG).show());
@@ -145,9 +159,41 @@ public class PlanInputActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull Throwable t) {
+                hideLoadingDialog();
                 runOnUiThread(() -> Toast.makeText(PlanInputActivity.this, "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show());
             }
         });
+    }
+
+    private void showLoadingDialog() {
+        if (loadingDialog == null) {
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setPadding(50, 50, 50, 50);
+            layout.setGravity(Gravity.CENTER);
+            
+            ProgressBar progressBar = new ProgressBar(this);
+            layout.addView(progressBar);
+            
+            TextView tvMessage = new TextView(this);
+            tvMessage.setText("AI가 여행 일정을 생성하고 있습니다...\n(최대 15초 소요될 수 있습니다)");
+            tvMessage.setTextColor(Color.BLACK);
+            tvMessage.setGravity(Gravity.CENTER);
+            tvMessage.setPadding(0, 30, 0, 0);
+            layout.addView(tvMessage);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setView(layout);
+            builder.setCancelable(false);
+            loadingDialog = builder.create();
+        }
+        loadingDialog.show();
+    }
+
+    private void hideLoadingDialog() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
     }
     
     @Override

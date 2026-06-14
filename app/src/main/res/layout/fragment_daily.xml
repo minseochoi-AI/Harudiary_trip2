@@ -72,6 +72,15 @@
                 android:textSize="12sp" />
 
             <TextView
+                android:id="@+id/btn_generate_plan"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:text="✨"
+                android:textSize="17sp"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+            <TextView
                 android:id="@+id/btn_delete_records"
                 android:layout_width="36dp"
                 android:layout_height="36dp"

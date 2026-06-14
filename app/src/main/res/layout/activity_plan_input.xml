@@ -108,6 +108,25 @@
                 android:layout_marginBottom="32dp"
                 android:elevation="2dp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="하루에 방문할 장소 개수 📍"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#37352F"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/slider_places_per_day"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="4.0"
+                android:valueTo="10.0"
+                android:value="6.0"
+                android:stepSize="1.0"
+                android:layout_marginBottom="32dp" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

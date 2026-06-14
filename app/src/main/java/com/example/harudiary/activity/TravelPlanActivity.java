@@ -125,8 +125,15 @@ public class TravelPlanActivity extends AppCompatActivity implements TravelPlanA
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
+                PlaceDto deletedItem = flattenedList.get(position);
                 flattenedList.remove(position);
                 adapter.notifyItemRemoved(position);
+
+                com.google.android.material.snackbar.Snackbar.make(rvTravelPlan, "일정이 삭제되었습니다.", com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                        .setAction("실행 취소", v -> {
+                            flattenedList.add(position, deletedItem);
+                            adapter.notifyItemInserted(position);
+                        }).show();
             }
         });
         itemTouchHelper.attachToRecyclerView(rvTravelPlan);

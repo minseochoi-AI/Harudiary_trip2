@@ -19,6 +19,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.harudiary.R;
 import com.example.harudiary.activity.DeleteRecordsActivity;
+import com.example.harudiary.activity.PlanInputActivity;
 import com.example.harudiary.util.SessionManager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -66,6 +67,18 @@ public class DailyFragment extends Fragment {
         view.findViewById(R.id.btn_delete_records).setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), DeleteRecordsActivity.class);
             intent.putExtra(DeleteRecordsActivity.EXTRA_DATE, date);
+            startActivity(intent);
+        });
+
+        // AI 여행 계획 버튼
+        view.findViewById(R.id.btn_generate_plan).setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), PlanInputActivity.class);
+            intent.putExtra(PlanInputActivity.EXTRA_DATE, date);
+            EditText etTitleObj = view.findViewById(R.id.et_day_title);
+            String title = etTitleObj.getText().toString();
+            if (!title.isEmpty()) {
+                intent.putExtra("EXTRA_CONTENT", title);
+            }
             startActivity(intent);
         });
 
