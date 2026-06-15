@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,14 +11,15 @@
     android:animateLayoutChanges="true">
 
     <!-- 사진 영역 (없으면 GONE) -->
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_photo"
         android:layout_width="match_parent"
         android:layout_height="160dp"
         android:background="@drawable/bg_thumbnail"
         android:contentDescription="@null"
         android:scaleType="centerCrop"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:shapeAppearanceOverlay="@style/RoundedCornerImage" />
 
     <!-- 본문 영역 -->
     <LinearLayout

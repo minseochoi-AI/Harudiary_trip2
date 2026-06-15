@@ -106,13 +106,14 @@
         </LinearLayout>
 
         <!-- 사진 미리보기 -->
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/iv_photo"
             android:layout_width="match_parent"
             android:layout_height="180dp"
             android:scaleType="centerCrop"
             android:visibility="gone"
-            android:contentDescription="기록 사진" />
+            android:contentDescription="기록 사진"
+            app:shapeAppearanceOverlay="@style/RoundedCornerImage" />
 
     </LinearLayout>
 
