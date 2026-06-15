@@ -321,7 +321,21 @@ public class FriendRecordActivity extends AppCompatActivity {
         }
 
         ((TextView) card.findViewById(R.id.tv_content)).setText(record.getContent() != null ? record.getContent() : "");
-        ((TextView) card.findViewById(R.id.tv_rating)).setText(buildStars(record.getRating() != null ? record.getRating() : 0));
+        
+        TextView tvPlanBadge = card.findViewById(R.id.tv_plan_badge);
+        TextView tvRating = card.findViewById(R.id.tv_rating);
+
+        if (record.isPlan()) {
+            if (tvPlanBadge != null) tvPlanBadge.setVisibility(View.VISIBLE);
+            if (tvRating != null) tvRating.setVisibility(View.GONE);
+        } else {
+            if (tvPlanBadge != null) tvPlanBadge.setVisibility(View.GONE);
+            if (tvRating != null) {
+                tvRating.setVisibility(View.VISIBLE);
+                tvRating.setText(buildStars(record.getRating() != null ? record.getRating() : 0));
+            }
+        }
+
         String addr = record.getAddress();
         ((TextView) card.findViewById(R.id.tv_location)).setText((addr != null && !addr.isEmpty()) ? "📍 " + addr : "");
 

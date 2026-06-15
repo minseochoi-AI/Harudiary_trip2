@@ -12,6 +12,9 @@ public class TimelineDTO {
     @SerializedName("timeSlot")
     private String timeSlot;
     
+    @SerializedName("isPlan")
+    private boolean isPlan;
+    
     @SerializedName("content")
     private String content;
     
@@ -51,6 +54,7 @@ public class TimelineDTO {
     public Long getId() { return id; }
     public String getDate() { return date; }
     public String getTimeSlot() { return timeSlot; }
+    public boolean isPlan() { return isPlan; }
     public String getContent() { return content; }
     public String getPhotoUri() { return photoUri; }
     public Float getRating() { return rating; }
