@@ -31,7 +31,14 @@ public class SessionManager {
     }
 
     public String getUserId() {
-        return prefs.getString(KEY_USER_ID, "-1");
+        try {
+            return prefs.getString(KEY_USER_ID, "-1");
+        } catch (ClassCastException e) {
+            int legacyId = prefs.getInt(KEY_USER_ID, -1);
+            String strId = String.valueOf(legacyId);
+            prefs.edit().putString(KEY_USER_ID, strId).apply();
+            return strId;
+        }
     }
 
     public boolean isLoggedIn() {
