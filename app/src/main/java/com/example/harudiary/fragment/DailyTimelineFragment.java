@@ -193,7 +193,7 @@ public class DailyTimelineFragment extends Fragment {
 
             // 내용, 별점, 주소
             holder.tvContent.setText(record.getContent() != null ? record.getContent() : "");
-            holder.tvRating.setText(buildStars(record.getRating()));
+            holder.tvRating.setText(buildStars(record.getRating() != null ? record.getRating() : 0f));
             String addr = record.getAddress();
             holder.tvLocation.setText((addr != null && !addr.isEmpty()) ? addr : "위치 정보 없음");
 
