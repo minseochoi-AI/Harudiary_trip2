@@ -30,6 +30,7 @@ import java.util.List;
 
 import com.example.harudiary.api.RetrofitClient;
 import com.example.harudiary.api.DiaryApi;
+import com.example.harudiary.api.ReactionApi;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -339,8 +340,10 @@ public class DailyTimelineFragment extends Fragment {
                 @Override
                 public void onResponse(@NonNull retrofit2.Call<java.util.Map<String, Integer>> call, @NonNull retrofit2.Response<java.util.Map<String, Integer>> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        int heartCount = response.body().getOrDefault("likes", 0);
-                        int commentCount = response.body().getOrDefault("comments", 0);
+                        Integer likes = response.body().get("likes");
+                        Integer comments = response.body().get("comments");
+                        int heartCount = likes != null ? likes : 0;
+                        int commentCount = comments != null ? comments : 0;
                         
                         holder.tvHeartCount.setText(String.valueOf(heartCount));
                         holder.tvCommentCount.setText(String.valueOf(commentCount));
