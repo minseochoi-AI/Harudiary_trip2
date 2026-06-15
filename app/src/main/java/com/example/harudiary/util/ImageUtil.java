@@ -14,10 +14,10 @@ public class ImageUtil {
             com.bumptech.glide.Glide.with(context)
                     .load(uriStr)
                     .dontAnimate()
-                    .error(android.R.color.transparent)
+                    .error(com.example.harudiary.R.drawable.ic_photo_placeholder)
                     .into(iv);
         } catch (Exception e) {
-            iv.setImageURI(null);
+            iv.setImageResource(com.example.harudiary.R.drawable.ic_photo_placeholder);
         }
     }
 }
