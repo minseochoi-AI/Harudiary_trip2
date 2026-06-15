@@ -73,12 +73,23 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
                 ContextCompat.getDrawable(vh.itemView.getContext(), R.drawable.bg_thumbnail));
         com.example.harudiary.util.ImageUtil.setSafeImageURI(vh.itemView.getContext(), vh.ivThumbnail, r.getPhotoUri());
 
-        // 항목 클릭 시 상세(Daily)로 이동하도록 콜백
-        vh.itemView.setOnClickListener(v -> {
-            if (listener != null && r.getDate() != null) {
-                listener.onDateClick(r.getDate());
-            }
-        });
+        // AI 여행계획 생성 버튼 로직
+        if (r.isPlan()) {
+            vh.btnGeneratePlan.setVisibility(View.GONE);
+        } else {
+            vh.btnGeneratePlan.setVisibility(View.VISIBLE);
+            vh.btnGeneratePlan.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(vh.itemView.getContext(), com.example.harudiary.activity.PlanInputActivity.class);
+                intent.putExtra(com.example.harudiary.activity.PlanInputActivity.EXTRA_DATE, r.getDate());
+                if (r.getContent() != null && !r.getContent().isEmpty()) {
+                    intent.putExtra("EXTRA_CONTENT", r.getContent());
+                }
+                vh.itemView.getContext().startActivity(intent);
+            });
+        }
+
+        // 항목 클릭 시 상세(Daily)로 이동하는 로직 제거 (홈 상세 타임라인 보기에서만 쓰이도록 리다이렉트 수정)
+        // vh.itemView.setOnClickListener(v -> { ... });
     }
 
     @Override
@@ -112,7 +123,7 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivThumbnail;
-        TextView tvDateSlot, tvContent, tvMeta;
+        TextView tvDateSlot, tvContent, tvMeta, btnGeneratePlan;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -120,6 +131,7 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
             tvDateSlot = itemView.findViewById(R.id.tv_date_slot);
             tvContent = itemView.findViewById(R.id.tv_content);
             tvMeta = itemView.findViewById(R.id.tv_meta);
+            btnGeneratePlan = itemView.findViewById(R.id.btn_generate_plan);
         }
     }
 }
