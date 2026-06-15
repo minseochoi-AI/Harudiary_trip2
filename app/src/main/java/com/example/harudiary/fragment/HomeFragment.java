@@ -325,6 +325,7 @@ public class HomeFragment extends Fragment {
         
         tvTodayDay.setOnClickListener(v -> onDateClick(dateStr));
         tvLastRecordTime.setOnClickListener(v -> onDateClick(dateStr));
+        btnViewDetails.setOnClickListener(v -> onDateClick(dateStr));
 
         DiaryApi diaryApi = RetrofitClient.getClient().create(DiaryApi.class);
         diaryApi.getActivitiesByDate(userIdStr, dateStr).enqueue(new Callback<List<Record>>() {

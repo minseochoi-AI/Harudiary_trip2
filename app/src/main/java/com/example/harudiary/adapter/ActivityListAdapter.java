@@ -88,11 +88,17 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
             });
         }
 
-        // 항목 클릭 시 상세(Daily)로 이동하도록 콜백 복구 (다이어리 카드 클릭 시 확인 및 수정 진입)
+        // 개별 다이어리 카드 클릭 시 개별 다이어리(RecordActivity)로 진입
         vh.itemView.setOnClickListener(v -> {
-            if (listener != null && r.getDate() != null) {
-                listener.onDateClick(r.getDate());
+            android.content.Intent intent = new android.content.Intent(vh.itemView.getContext(), com.example.harudiary.activity.RecordActivity.class);
+            if (r.getActivityId() != null) {
+                intent.putExtra("EXTRA_DIARY_ID", r.getActivityId());
             }
+            if (r.getDate() != null) intent.putExtra("EXTRA_DATE", r.getDate());
+            if (r.getTimeSlot() != null) intent.putExtra("EXTRA_TIME_SLOT", r.getTimeSlot());
+            if (r.getContent() != null) intent.putExtra("EXTRA_CONTENT", r.getContent());
+            if (r.getPhotoUri() != null) intent.putExtra("EXTRA_PHOTO_URI", r.getPhotoUri());
+            vh.itemView.getContext().startActivity(intent);
         });
     }
 
