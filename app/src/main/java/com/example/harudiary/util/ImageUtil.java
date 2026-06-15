@@ -11,11 +11,10 @@ public class ImageUtil {
             return;
         }
         try {
-            Uri uri = Uri.parse(uriStr);
-            if (uriStr.startsWith("content://")) {
-                context.getContentResolver().openInputStream(uri).close();
-            }
-            iv.setImageURI(uri);
+            com.bumptech.glide.Glide.with(context)
+                    .load(uriStr)
+                    .error(android.R.color.transparent)
+                    .into(iv);
         } catch (Exception e) {
             iv.setImageURI(null);
         }
