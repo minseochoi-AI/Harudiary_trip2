@@ -276,7 +276,7 @@ public class DailyTimelineFragment extends Fragment {
                 if (!isAdded()) return;
                 try {
                     CommentBottomSheetFragment sheet = CommentBottomSheetFragment.newInstance(activityId);
-                    sheet.setOnCommentChangedListener(() -> loadReactionCounts(holder));
+                    sheet.setOnCommentChangedListener(() -> loadReactionCounts(holder, record));
                     sheet.show(getChildFragmentManager(), "comments_" + activityId);
                 } catch (Exception ignored) {}
             });
@@ -328,20 +328,34 @@ public class DailyTimelineFragment extends Fragment {
                 return true;
             });
 
-            loadReactionCounts(holder);
+            loadReactionCounts(holder, record);
         }
 
-        private void loadReactionCounts(ViewHolder holder) {
-            int heartCount = 0;
-            int commentCount = 0;
-            holder.tvHeartCount.setText(String.valueOf(heartCount));
-            holder.tvCommentCount.setText(String.valueOf(commentCount));
+        private void loadReactionCounts(ViewHolder holder, Record record) {
+            if (record.getActivityId() == null) return;
+            
+            ReactionApi api = RetrofitClient.getClient().create(ReactionApi.class);
+            api.getReactionCounts(record.getActivityId()).enqueue(new retrofit2.Callback<java.util.Map<String, Integer>>() {
+                @Override
+                public void onResponse(@NonNull retrofit2.Call<java.util.Map<String, Integer>> call, @NonNull retrofit2.Response<java.util.Map<String, Integer>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        int heartCount = response.body().getOrDefault("likes", 0);
+                        int commentCount = response.body().getOrDefault("comments", 0);
+                        
+                        holder.tvHeartCount.setText(String.valueOf(heartCount));
+                        holder.tvCommentCount.setText(String.valueOf(commentCount));
 
-            if ((heartCount > 0 || commentCount > 0) && holder.reactionBar.getVisibility() != View.VISIBLE) {
-                holder.reactionBar.setAlpha(1f);
-                holder.reactionBar.setScaleY(1f);
-                holder.reactionBar.setVisibility(View.VISIBLE);
-            }
+                        if ((heartCount > 0 || commentCount > 0) && holder.reactionBar.getVisibility() != View.VISIBLE) {
+                            showReactionBar(holder.reactionBar);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull retrofit2.Call<java.util.Map<String, Integer>> call, @NonNull Throwable t) {
+                    // Ignore failure
+                }
+            });
         }
 
         private void showReactionBar(View bar) {
