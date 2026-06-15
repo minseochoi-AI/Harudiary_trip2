@@ -225,7 +225,7 @@ public class DailyTimelineFragment extends Fragment {
                     .setMessage("이 기록을 삭제하시겠습니까?")
                     .setPositiveButton("삭제", (dialog, which) -> {
                         DiaryApi api = RetrofitClient.getClient().create(DiaryApi.class);
-                        api.deleteDiary(record.getActivityId() != null ? record.getActivityId() : record.getId(), userId).enqueue(new retrofit2.Callback<Void>() {
+                        api.deleteDiary(record.getActivityId(), userId).enqueue(new retrofit2.Callback<Void>() {
                             @Override
                             public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
                                 if (response.isSuccessful()) {

@@ -115,7 +115,7 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
                 .setPositiveButton("삭제", (dialog, which) -> {
                     String userId = new com.example.harudiary.util.SessionManager(vh.itemView.getContext()).getUserId();
                     DiaryApi api = RetrofitClient.getClient().create(DiaryApi.class);
-                    api.deleteDiary(r.getActivityId() != null ? r.getActivityId() : r.getId(), userId).enqueue(new retrofit2.Callback<Void>() {
+                    api.deleteDiary(r.getActivityId(), userId).enqueue(new retrofit2.Callback<Void>() {
                         @Override
                         public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
                             if (response.isSuccessful()) {
