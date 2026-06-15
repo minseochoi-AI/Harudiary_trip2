@@ -63,6 +63,14 @@ public class HomeFragment extends Fragment {
 
     private int currentYear, currentMonth;
     private int todayYear, todayMonth, todayDay;
+    private String selectedDate;
+    private android.location.LocationManager locationManager;
+    private android.location.LocationListener locationListener;
+    private android.app.AlertDialog loadingDialog;
+    private android.widget.TextView loadingMessage;
+    private android.os.Handler locationTimeoutHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private static final int PERMISSION_REQUEST_LOCATION = 1001;
+
     private int selectedDay;
     // 오늘 섹션에서 보는 날짜 (◀▶ 이동용)
     private int viewDay, viewMonth, viewYear;
@@ -168,6 +176,12 @@ public class HomeFragment extends Fragment {
                 ((MainActivity) getActivity()).navigateToRecord();
             }
         });
+
+        // 내 주변 즉석 추천 버튼
+        view.findViewById(R.id.btn_instant_recommend).setOnClickListener(v -> {
+            startInstantRecommend();
+        });
+
 
         // 설정 (hidden, 호환성)
         view.findViewById(R.id.tv_settings).setOnClickListener(v ->
@@ -323,9 +337,9 @@ public class HomeFragment extends Fragment {
         if (name == null || name.isEmpty()) name = "D·LOGGER";
         tvDearTitle.setText("DEAR. " + name + "님");
         
-        tvTodayDay.setOnClickListener(v -> onDateClick(dateStr));
-        tvLastRecordTime.setOnClickListener(v -> onDateClick(dateStr));
-        btnViewDetails.setOnClickListener(v -> onDateClick(dateStr));
+        tvTodayDay.setOnClickListener(v -> onDateClick(viewYear, viewMonth, viewDay));
+        tvLastRecordTime.setOnClickListener(v -> onDateClick(viewYear, viewMonth, viewDay));
+        btnViewDetails.setOnClickListener(v -> onDateClick(viewYear, viewMonth, viewDay));
 
         DiaryApi diaryApi = RetrofitClient.getClient().create(DiaryApi.class);
         diaryApi.getActivitiesByDate(userIdStr, dateStr).enqueue(new Callback<List<Record>>() {
@@ -437,7 +451,7 @@ public class HomeFragment extends Fragment {
             llTodayPhotos.removeAllViews();
             List<Record> withPhotos = new ArrayList<>();
             for (Record r : records) {
-                if (r.getPhotoUri() != null && !r.getPhotoUri().isEmpty()) withPhotos.add(r);
+                if (r.getPhotoUri() != null && r.getPhotoUri().isEmpty()) withPhotos.add(r);
             }
 
             if (withPhotos.isEmpty()) {
@@ -459,7 +473,7 @@ public class HomeFragment extends Fragment {
                     } else {
                         tvSlot.setVisibility(View.GONE);
                     }
-                    item.setOnClickListener(v -> onDateClick(dateStr));
+                    item.setOnClickListener(v -> onDateClick(viewYear, viewMonth, viewDay));
                     llTodayPhotos.addView(item);
                 }
             }
@@ -550,26 +564,172 @@ public class HomeFragment extends Fragment {
 
     private void refreshFriendSection() { loadFriendBrowse(); updateBadge(); }
 
-    private void onDateClick(String date) {
-        // 날짜 파싱하여 viewDay, viewMonth, viewYear 업데이트
-        try {
-            String[] parts = date.split("-");
-            viewYear = Integer.parseInt(parts[0]);
-            viewMonth = Integer.parseInt(parts[1]) - 1;
-            viewDay = Integer.parseInt(parts[2]);
-            
-            selectedDay = viewDay;
-            if (currentMonth == viewMonth && currentYear == viewYear && calendarAdapter != null) {
-                calendarAdapter.setSelectedDay(selectedDay);
-            }
-        } catch (Exception e) {}
-        
-        loadTodaySection();
-        loadTodayPhotos();
+    private void onDateClick(int year, int month, int day) {
+        if (calendarAdapter != null && calendarAdapter.isWeekMode()) {
+            startActivity(new Intent(requireContext(), DailyActivity.class)
+                    .putExtra("year", year)
+                    .putExtra("month", month + 1)
+                    .putExtra("day", day)
+            );
+        } else {
+            selectedDay = day;
+            updateCalendarUI(calendarAdapter != null ? calendarAdapter.getRecordDates() : new java.util.HashMap<>(),
+                    (currentYear == todayYear && currentMonth == todayMonth) ? todayDay : 0);
+            loadTodaySection();
+        }
+    }
 
-        // 사용자의 요청에 따라 달력 클릭 시 즉시 상세 일정(Daily) 화면으로 이동
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).navigateToDaily(date);
+    private void startInstantRecommend() {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_LOCATION);
+            return;
+        }
+
+        showLoadingDialog("GPS 위치를 확인 중입니다...");
+
+        locationManager = (android.location.LocationManager) requireContext().getSystemService(android.content.Context.LOCATION_SERVICE);
+        if (locationManager == null) {
+            hideLoadingDialog();
+            android.widget.Toast.makeText(requireContext(), "위치 서비스를 사용할 수 없습니다.", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        locationListener = new android.location.LocationListener() {
+            @Override
+            public void onLocationChanged(@androidx.annotation.NonNull android.location.Location location) {
+                locationTimeoutHandler.removeCallbacksAndMessages(null);
+                try { locationManager.removeUpdates(this); } catch (Exception ignored) {}
+                onLocationAcquiredForRecommend(location.getLatitude(), location.getLongitude());
+            }
+        };
+
+        try {
+            boolean isNetworkEnabled = locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER);
+            boolean isGpsEnabled = locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER);
+
+            if (!isNetworkEnabled && !isGpsEnabled) {
+                hideLoadingDialog();
+                android.widget.Toast.makeText(requireContext(), "GPS 또는 네트워크 위치를 켜주세요.", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (isNetworkEnabled) {
+                locationManager.requestLocationUpdates(android.location.LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+            }
+            if (isGpsEnabled) {
+                locationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            }
+
+            // 10초 타임아웃
+            locationTimeoutHandler.postDelayed(() -> {
+                if (locationListener != null && locationManager != null) {
+                    try { locationManager.removeUpdates(locationListener); } catch (Exception ignored) {}
+                }
+                hideLoadingDialog();
+                if (isAdded()) {
+                    android.widget.Toast.makeText(requireContext(), "위치 정보를 가져오는데 실패했습니다.", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }, 10000);
+
+        } catch (SecurityException e) {
+            hideLoadingDialog();
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @androidx.annotation.NonNull String[] permissions, @androidx.annotation.NonNull int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                startInstantRecommend();
+            } else {
+                android.widget.Toast.makeText(requireContext(), "위치 권한이 필요합니다.", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void onLocationAcquiredForRecommend(double lat, double lng) {
+        if (!isAdded()) return;
+        requireActivity().runOnUiThread(() -> {
+            if (loadingMessage != null) {
+                loadingMessage.setText("AI가 주변 장소를 추천하고 있습니다...\n(최대 15초 소요될 수 있습니다)");
+            }
+        });
+
+        com.example.harudiary.api.TravelApi api = RetrofitClient.getClient().create(com.example.harudiary.api.TravelApi.class);
+        api.recommendNearby(lat, lng, 2000, 1).enqueue(new retrofit2.Callback<com.example.harudiary.model.TravelPlanResponse>() {
+            @Override
+            public void onResponse(@androidx.annotation.NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @androidx.annotation.NonNull retrofit2.Response<com.example.harudiary.model.TravelPlanResponse> response) {
+                hideLoadingDialog();
+                if (response.isSuccessful() && response.body() != null) {
+                    if (response.body().getDays() == null || response.body().getDays().isEmpty() || "지역을 알 수 없습니다".equals(response.body().getTripTitle())) {
+                        if (isAdded()) requireActivity().runOnUiThread(() -> android.widget.Toast.makeText(requireContext(), "주변 장소 추천에 실패했습니다.", android.widget.Toast.LENGTH_SHORT).show());
+                        return;
+                    }
+                    if (isAdded()) {
+                        android.content.Intent intent = new android.content.Intent(requireContext(), com.example.harudiary.activity.TravelPlanActivity.class);
+                        intent.putExtra("plan", response.body());
+                        
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.KOREA);
+                        sdf.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Seoul"));
+                        intent.putExtra("date", sdf.format(new java.util.Date()));
+                        
+                        startActivity(intent);
+                    }
+                } else {
+                    if (isAdded()) requireActivity().runOnUiThread(() -> android.widget.Toast.makeText(requireContext(), "추천 실패", android.widget.Toast.LENGTH_SHORT).show());
+                }
+            }
+
+            @Override
+            public void onFailure(@androidx.annotation.NonNull retrofit2.Call<com.example.harudiary.model.TravelPlanResponse> call, @androidx.annotation.NonNull Throwable t) {
+                hideLoadingDialog();
+                if (isAdded()) requireActivity().runOnUiThread(() -> android.widget.Toast.makeText(requireContext(), "네트워크 오류: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void showLoadingDialog(String message) {
+        if (loadingDialog == null) {
+            android.widget.LinearLayout layout = new android.widget.LinearLayout(requireContext());
+            layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+            layout.setPadding(50, 50, 50, 50);
+            layout.setGravity(android.view.Gravity.CENTER);
+
+            android.widget.ProgressBar progressBar = new android.widget.ProgressBar(requireContext());
+            layout.addView(progressBar);
+
+            loadingMessage = new android.widget.TextView(requireContext());
+            loadingMessage.setText(message);
+            loadingMessage.setTextColor(android.graphics.Color.BLACK);
+            loadingMessage.setGravity(android.view.Gravity.CENTER);
+            loadingMessage.setPadding(0, 30, 0, 0);
+            layout.addView(loadingMessage);
+
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
+            builder.setView(layout);
+            builder.setCancelable(false);
+            loadingDialog = builder.create();
+        } else {
+            if (loadingMessage != null) loadingMessage.setText(message);
+        }
+        loadingDialog.show();
+    }
+
+    private void hideLoadingDialog() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (locationTimeoutHandler != null) {
+            locationTimeoutHandler.removeCallbacksAndMessages(null);
+        }
+        if (locationManager != null && locationListener != null) {
+            try { locationManager.removeUpdates(locationListener); } catch (Exception ignored) {}
         }
     }
 

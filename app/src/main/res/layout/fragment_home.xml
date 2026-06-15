@@ -318,6 +318,20 @@
                     android:textStyle="bold"
                     android:background="?attr/selectableItemBackground" />
 
+                <!-- 내 주변 즉석 추천 버튼 (신규) -->
+                <TextView
+                    android:id="@+id/btn_instant_recommend"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="✨ 내 주변 즉석 추천 ✨"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:backgroundTint="#4CAF50"
+                    android:background="@drawable/bg_primary_button" />
+
             </LinearLayout>
 
             <!-- ── DEAR 섹션 + 오늘의 질문 ───────────────── -->
