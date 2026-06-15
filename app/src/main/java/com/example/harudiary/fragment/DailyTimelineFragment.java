@@ -218,6 +218,41 @@ public class DailyTimelineFragment extends Fragment {
                 startActivity(intent);
             });
 
+            // 삭제 버튼 로직
+            holder.btnDelete.setOnClickListener(v -> {
+                new android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("기록 삭제")
+                    .setMessage("이 기록을 삭제하시겠습니까?")
+                    .setPositiveButton("삭제", (dialog, which) -> {
+                        DiaryApi api = RetrofitClient.getClient().create(DiaryApi.class);
+                        api.deleteDiary(record.getActivityId() != null ? record.getActivityId() : record.getId(), userId).enqueue(new retrofit2.Callback<Void>() {
+                            @Override
+                            public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    int pos = holder.getAdapterPosition();
+                                    if (pos != RecyclerView.NO_POSITION) {
+                                        records.remove(pos);
+                                        notifyItemRemoved(pos);
+                                        android.widget.Toast.makeText(requireContext(), "삭제되었습니다.", android.widget.Toast.LENGTH_SHORT).show();
+                                        if (records.isEmpty()) {
+                                            rvTimeline.setVisibility(View.GONE);
+                                            tvEmpty.setVisibility(View.VISIBLE);
+                                        }
+                                    }
+                                } else {
+                                    android.widget.Toast.makeText(requireContext(), "삭제 실패", android.widget.Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                            @Override
+                            public void onFailure(@NonNull retrofit2.Call<Void> call, @NonNull Throwable t) {
+                                android.widget.Toast.makeText(requireContext(), "네트워크 오류", android.widget.Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    })
+                    .setNegativeButton("취소", null)
+                    .show();
+            });
+
             // 리액션 바 설정
             setupReactionBar(holder, record);
         }
@@ -326,7 +361,7 @@ public class DailyTimelineFragment extends Fragment {
             LinearLayout cardRoot, reactionBar, btnHeart, btnComment;
             ImageView ivPhoto;
             TextView tvCardTime, tvCardWeather, tvContent, tvRating, tvLocation, tvPlanBadge;
-            TextView tvHeartIcon, tvHeartCount, tvCommentCount, btnCloseReaction, btnGeneratePlan;
+            TextView tvHeartIcon, tvHeartCount, tvCommentCount, btnCloseReaction, btnGeneratePlan, btnDelete;
 
             ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -339,6 +374,7 @@ public class DailyTimelineFragment extends Fragment {
                 tvLocation = itemView.findViewById(R.id.tv_location);
                 tvPlanBadge = itemView.findViewById(R.id.tv_plan_badge);
                 btnGeneratePlan = itemView.findViewById(R.id.btn_generate_plan);
+                btnDelete = itemView.findViewById(R.id.btn_delete);
 
                 reactionBar = itemView.findViewById(R.id.reaction_bar);
                 btnHeart = itemView.findViewById(R.id.btn_heart);

@@ -10,8 +10,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Toast;
+import android.app.AlertDialog;
 
 import com.example.harudiary.R;
+import com.example.harudiary.api.RetrofitClient;
+import com.example.harudiary.api.DiaryApi;
 import com.example.harudiary.model.Record;
 
 import java.util.Calendar;
@@ -103,6 +107,37 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
             if (r.getPhotoUri() != null) intent.putExtra("EXTRA_PHOTO_URI", r.getPhotoUri());
             vh.itemView.getContext().startActivity(intent);
         });
+        // 개별 다이어리 삭제 로직
+        vh.btnDelete.setOnClickListener(v -> {
+            new AlertDialog.Builder(vh.itemView.getContext())
+                .setTitle("기록 삭제")
+                .setMessage("이 다이어리 기록을 삭제하시겠습니까?")
+                .setPositiveButton("삭제", (dialog, which) -> {
+                    String userId = new com.example.harudiary.util.SessionManager(vh.itemView.getContext()).getUserId();
+                    DiaryApi api = RetrofitClient.getClient().create(DiaryApi.class);
+                    api.deleteDiary(r.getActivityId() != null ? r.getActivityId() : r.getId(), userId).enqueue(new retrofit2.Callback<Void>() {
+                        @Override
+                        public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                int currentPos = vh.getAdapterPosition();
+                                if (currentPos != RecyclerView.NO_POSITION) {
+                                    records.remove(currentPos);
+                                    notifyItemRemoved(currentPos);
+                                    Toast.makeText(vh.itemView.getContext(), "삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(vh.itemView.getContext(), "삭제 실패", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override
+                        public void onFailure(@NonNull retrofit2.Call<Void> call, @NonNull Throwable t) {
+                            Toast.makeText(vh.itemView.getContext(), "네트워크 오류", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                })
+                .setNegativeButton("취소", null)
+                .show();
+        });
     }
 
     @Override
@@ -136,7 +171,7 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivThumbnail;
-        TextView tvDateSlot, tvContent, tvMeta, btnGeneratePlan;
+        TextView tvDateSlot, tvContent, tvMeta, btnGeneratePlan, btnDelete;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -145,6 +180,7 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
             tvContent = itemView.findViewById(R.id.tv_content);
             tvMeta = itemView.findViewById(R.id.tv_meta);
             btnGeneratePlan = itemView.findViewById(R.id.btn_generate_plan);
+            btnDelete = itemView.findViewById(R.id.btn_delete);
         }
     }
 }

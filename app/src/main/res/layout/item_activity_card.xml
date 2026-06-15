@@ -73,6 +73,18 @@
                 android:paddingHorizontal="6dp"
                 android:paddingVertical="4dp"
                 android:layout_marginStart="8dp" />
+
+            <!-- 삭제 버튼 -->
+            <TextView
+                android:id="@+id/btn_delete"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="🗑"
+                android:textColor="@color/gray_hint"
+                android:textSize="16sp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless" />
         </LinearLayout>
 
     </LinearLayout>

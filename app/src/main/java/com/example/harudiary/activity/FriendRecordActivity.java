@@ -339,6 +339,9 @@ public class FriendRecordActivity extends AppCompatActivity {
         String addr = record.getAddress();
         ((TextView) card.findViewById(R.id.tv_location)).setText((addr != null && !addr.isEmpty()) ? "📍 " + addr : "");
 
+        TextView btnDelete = card.findViewById(R.id.btn_delete);
+        if (btnDelete != null) btnDelete.setVisibility(View.GONE);
+
         TextView btnGeneratePlan = card.findViewById(R.id.btn_generate_plan);
         if (btnGeneratePlan != null) {
             btnGeneratePlan.setOnClickListener(v -> {
