@@ -325,6 +325,18 @@ public class FriendRecordActivity extends AppCompatActivity {
         String addr = record.getAddress();
         ((TextView) card.findViewById(R.id.tv_location)).setText((addr != null && !addr.isEmpty()) ? "📍 " + addr : "");
 
+        TextView btnGeneratePlan = card.findViewById(R.id.btn_generate_plan);
+        if (btnGeneratePlan != null) {
+            btnGeneratePlan.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(this, PlanInputActivity.class);
+                intent.putExtra(PlanInputActivity.EXTRA_DATE, record.getDate());
+                if (record.getContent() != null && !record.getContent().isEmpty()) {
+                    intent.putExtra("EXTRA_CONTENT", record.getContent());
+                }
+                startActivity(intent);
+            });
+        }
+
         Long activityId = record.getId();
         LinearLayout reactionBar = card.findViewById(R.id.reaction_bar);
         TextView tvHeartIcon = card.findViewById(R.id.tv_heart_icon);
