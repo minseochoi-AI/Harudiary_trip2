@@ -193,7 +193,8 @@ public class DailyTimelineFragment extends Fragment {
 
             // 내용, 별점, 주소
             holder.tvContent.setText(record.getContent() != null ? record.getContent() : "");
-            holder.tvRating.setText(buildStars(record.getRating()));
+            holder.tvRating.setVisibility(record.isPlan() ? View.GONE : View.VISIBLE);
+            holder.tvRating.setText("❤️ 0");
             String addr = record.getAddress();
             holder.tvLocation.setText((addr != null && !addr.isEmpty()) ? addr : "위치 정보 없음");
 
@@ -347,6 +348,7 @@ public class DailyTimelineFragment extends Fragment {
                         
                         holder.tvHeartCount.setText(String.valueOf(heartCount));
                         holder.tvCommentCount.setText(String.valueOf(commentCount));
+                        holder.tvRating.setText("❤️ " + heartCount);
 
                         if ((heartCount > 0 || commentCount > 0) && holder.reactionBar.getVisibility() != View.VISIBLE) {
                             showReactionBar(holder.reactionBar);

@@ -63,14 +63,35 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
         // 활동 내용
         vh.tvContent.setText(r.getContent() != null ? r.getContent() : "");
 
-        // 평점 + 날씨 또는 위치
-        StringBuilder meta = new StringBuilder("⭐ " + r.getRating());
+        // 기본 텍스트 (위치/날씨)
+        StringBuilder meta = new StringBuilder();
         if (r.getWeather() != null && !r.getWeather().isEmpty()) {
-            meta.append("    ").append(r.getWeather());
+            meta.append(r.getWeather());
         } else if (r.getAddress() != null && !r.getAddress().isEmpty()) {
-            meta.append("    📍 ").append(r.getAddress());
+            meta.append("📍 ").append(r.getAddress());
         }
         vh.tvMeta.setText(meta.toString());
+
+        if (r.getActivityId() != null) {
+            com.example.harudiary.api.ReactionApi api = com.example.harudiary.api.RetrofitClient.getClient().create(com.example.harudiary.api.ReactionApi.class);
+            api.getReactionCounts(r.getActivityId()).enqueue(new retrofit2.Callback<java.util.Map<String, Integer>>() {
+                @Override
+                public void onResponse(@androidx.annotation.NonNull retrofit2.Call<java.util.Map<String, Integer>> call, @androidx.annotation.NonNull retrofit2.Response<java.util.Map<String, Integer>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        Integer likes = response.body().get("likes");
+                        int heartCount = likes != null ? likes : 0;
+                        String currentMeta = meta.toString();
+                        if (currentMeta.isEmpty()) {
+                            vh.tvMeta.setText("❤️ " + heartCount);
+                        } else {
+                            vh.tvMeta.setText("❤️ " + heartCount + "    " + currentMeta);
+                        }
+                    }
+                }
+                @Override
+                public void onFailure(@androidx.annotation.NonNull retrofit2.Call<java.util.Map<String, Integer>> call, @androidx.annotation.NonNull Throwable t) {}
+            });
+        }
 
         // 썸네일
         vh.ivThumbnail.setBackground(

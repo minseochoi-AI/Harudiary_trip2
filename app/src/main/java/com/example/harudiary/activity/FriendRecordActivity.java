@@ -332,7 +332,7 @@ public class FriendRecordActivity extends AppCompatActivity {
             if (tvPlanBadge != null) tvPlanBadge.setVisibility(View.GONE);
             if (tvRating != null) {
                 tvRating.setVisibility(View.VISIBLE);
-                tvRating.setText(buildStars(record.getRating() != null ? record.getRating() : 0));
+                tvRating.setText("❤️ " + record.getHeartCount());
             }
         }
 
