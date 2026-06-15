@@ -50,6 +50,23 @@ public class RecordListFragment extends Fragment {
 
     private List<Record> allRecords = new ArrayList<>();
     private boolean searchVisible = false;
+    private String filterDate = null;
+
+    public static RecordListFragment newInstance(String date) {
+        RecordListFragment fragment = new RecordListFragment();
+        Bundle args = new Bundle();
+        args.putString("EXTRA_DATE", date);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            filterDate = getArguments().getString("EXTRA_DATE");
+        }
+    }
 
     @Nullable
     @Override
@@ -157,6 +174,20 @@ public class RecordListFragment extends Fragment {
                         }
                     }
                     allRecords = fetched;
+
+                    // If a filterDate is provided, keep only records matching that date
+                    if (filterDate != null) {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                            allRecords.removeIf(r -> r.getDate() == null || !r.getDate().equals(filterDate));
+                        } else {
+                            java.util.Iterator<Record> it = allRecords.iterator();
+                            while (it.hasNext()) {
+                                Record r = it.next();
+                                if (r.getDate() == null || !r.getDate().equals(filterDate)) it.remove();
+                            }
+                        }
+                    }
+
                     // 내림차순 정렬 (날짜 -> activityId)
                     allRecords.sort((r1, r2) -> {
                         String d1 = r1.getDate() != null ? r1.getDate() : "";

@@ -185,11 +185,16 @@ public class MainActivity extends AppCompatActivity {
     // ── Fragment에서 호출 ────────────────────────────────────────
 
     public void navigateToDaily(String date) {
+        currentTab = 1;
+        getSupportFragmentManager().popBackStack(null,
+                androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, DailyFragment.newInstance(date))
-                .addToBackStack(null)
+                .replace(R.id.fragment_container, ListFragment.newInstance(date))
                 .commit();
+
+        updateNavHighlight(1);
     }
 
     public void navigateToRecordEdit(com.example.harudiary.model.Record record) {

@@ -17,6 +17,24 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 public class ListFragment extends Fragment {
 
+    private String filterDate = null;
+
+    public static ListFragment newInstance(String date) {
+        ListFragment fragment = new ListFragment();
+        Bundle args = new Bundle();
+        args.putString("EXTRA_DATE", date);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            filterDate = getArguments().getString("EXTRA_DATE");
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -31,9 +49,9 @@ public class ListFragment extends Fragment {
             @Override
             public Fragment createFragment(int position) {
                 if (position == 1) {
-                    return new PlanListFragment();
+                    return filterDate != null ? PlanListFragment.newInstance(filterDate) : new PlanListFragment();
                 }
-                return new RecordListFragment();
+                return filterDate != null ? RecordListFragment.newInstance(filterDate) : new RecordListFragment();
             }
 
             @Override

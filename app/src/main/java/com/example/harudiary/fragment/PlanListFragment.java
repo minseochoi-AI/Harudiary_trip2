@@ -34,6 +34,23 @@ public class PlanListFragment extends Fragment {
     private TextView tvEmpty;
     private PlanListAdapter adapter;
     private String userIdStr;
+    private String filterDate = null;
+
+    public static PlanListFragment newInstance(String date) {
+        PlanListFragment fragment = new PlanListFragment();
+        Bundle args = new Bundle();
+        args.putString("EXTRA_DATE", date);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            filterDate = getArguments().getString("EXTRA_DATE");
+        }
+    }
 
     @Nullable
     @Override
@@ -76,6 +93,18 @@ public class PlanListFragment extends Fragment {
                         java.util.Iterator<Record> it = plans.iterator();
                         while (it.hasNext()) {
                             if (!it.next().isPlan()) it.remove();
+                        }
+                    }
+
+                    // Apply filterDate overlap check
+                    if (filterDate != null) {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                            plans.removeIf(r -> !isOverlapping(r, filterDate));
+                        } else {
+                            java.util.Iterator<Record> it = plans.iterator();
+                            while (it.hasNext()) {
+                                if (!isOverlapping(it.next(), filterDate)) it.remove();
+                            }
                         }
                     }
                 }
@@ -133,5 +162,30 @@ public class PlanListFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private boolean isOverlapping(Record r, String filterDate) {
+        if (filterDate == null) return true;
+        String startDateStr = r.getDate();
+        if (startDateStr == null) return false;
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.KOREA);
+            java.util.Date start = sdf.parse(startDateStr);
+            java.util.Date filter = sdf.parse(filterDate);
+            if (start == null || filter == null) return false;
+            
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(start);
+            int duration = r.getDuration() > 0 ? r.getDuration() : 1;
+            cal.add(java.util.Calendar.DAY_OF_YEAR, duration - 1);
+            java.util.Date end = cal.getTime();
+            
+            // start <= filter <= end
+            // To compare accurately without time components, we can just use before/after
+            // but since parsing "yyyy-MM-dd" sets time to 00:00:00, before/after works perfectly.
+            return !filter.before(start) && !filter.after(end);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
