@@ -355,12 +355,8 @@ public class HomeFragment extends Fragment {
             for (int i = 0; i < count; i++) {
                 Record r = dayRecords.get(i);
                 if (r.getPhotoUri() == null || r.getPhotoUri().isEmpty()) continue;
-                ImageView iv = new ImageView(requireContext());
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dpToPx(44), dpToPx(44));
-                lp.setMarginStart(dpToPx(4));
-                iv.setLayoutParams(lp);
-                iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                iv.setBackgroundResource(R.drawable.bg_thumbnail);
+                ImageView iv = (ImageView) LayoutInflater.from(requireContext())
+                        .inflate(R.layout.item_today_thumb, llTodayThumbs, false);
                 com.example.harudiary.util.ImageUtil.setSafeImageURI(requireContext(), iv, r.getPhotoUri());
                 llTodayThumbs.addView(iv);
             }

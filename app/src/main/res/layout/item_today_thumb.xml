@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.imageview.ShapeableImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/iv_thumb"
+    android:layout_width="44dp"
+    android:layout_height="44dp"
+    android:layout_marginStart="4dp"
+    android:scaleType="centerCrop"
+    app:shapeAppearanceOverlay="@style/RoundedCornerImage" />

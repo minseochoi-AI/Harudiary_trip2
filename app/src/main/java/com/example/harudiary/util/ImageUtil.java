@@ -13,6 +13,7 @@ public class ImageUtil {
         try {
             com.bumptech.glide.Glide.with(context)
                     .load(uriStr)
+                    .dontAnimate()
                     .error(android.R.color.transparent)
                     .into(iv);
         } catch (Exception e) {

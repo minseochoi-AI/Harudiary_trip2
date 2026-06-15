@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="88dp"
     android:layout_height="88dp"
     android:layout_marginEnd="8dp">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_photo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:background="@drawable/bg_thumbnail"
-        android:contentDescription="오늘 사진" />
+        android:contentDescription="오늘 사진"
+        app:shapeAppearanceOverlay="@style/RoundedCornerImage" />
 
     <!-- 슬롯 배지 -->
     <TextView
