@@ -131,7 +131,7 @@ public class RecordActivity extends AppCompatActivity {
             if (photoUri != null && !photoUri.isEmpty()) {
                 selectedPhotoUri = photoUri;
                 try {
-                    ivPhoto.setImageURI(Uri.parse(photoUri));
+                    com.example.harudiary.util.ImageUtil.setSafeImageURI(this, ivPhoto, photoUri);
                     layoutPhotoContainer.setVisibility(View.VISIBLE);
                     btnAddPhoto.setVisibility(View.GONE);
                 } catch (Exception ignored) {}
@@ -305,7 +305,7 @@ public class RecordActivity extends AppCompatActivity {
             Uri uri = data.getData();
             if (uri != null) {
                 selectedPhotoUri = uri.toString();
-                ivPhoto.setImageURI(uri);
+                com.example.harudiary.util.ImageUtil.setSafeImageURI(this, ivPhoto, uri.toString());
                 layoutPhotoContainer.setVisibility(View.VISIBLE);
                 btnAddPhoto.setVisibility(View.GONE);
             }

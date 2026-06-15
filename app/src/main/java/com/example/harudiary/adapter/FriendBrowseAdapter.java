@@ -88,7 +88,7 @@ public class FriendBrowseAdapter extends RecyclerView.Adapter<FriendBrowseAdapte
         // 사진
         if (record.getPhotoUri() != null && !record.getPhotoUri().isEmpty()) {
             try {
-                holder.ivPhoto.setImageURI(Uri.parse(record.getPhotoUri()));
+                com.example.harudiary.util.ImageUtil.setSafeImageURI(holder.itemView.getContext(), holder.ivPhoto, record.getPhotoUri());
                 holder.ivPhoto.setVisibility(View.VISIBLE);
             } catch (Exception e) {
                 holder.ivPhoto.setVisibility(View.GONE);

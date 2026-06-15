@@ -84,6 +84,9 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
                 if (r.getContent() != null && !r.getContent().isEmpty()) {
                     intent.putExtra("EXTRA_CONTENT", r.getContent());
                 }
+                if (r.getAddress() != null && !r.getAddress().isEmpty()) {
+                    intent.putExtra("EXTRA_DESTINATION", r.getAddress());
+                }
                 vh.itemView.getContext().startActivity(intent);
             });
         }

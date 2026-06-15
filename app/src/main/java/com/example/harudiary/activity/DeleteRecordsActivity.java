@@ -151,7 +151,7 @@ public class DeleteRecordsActivity extends AppCompatActivity {
         // 썸네일
         if (record.getPhotoUri() != null && !record.getPhotoUri().isEmpty()) {
             try {
-                ivThumb.setImageURI(Uri.parse(record.getPhotoUri()));
+                com.example.harudiary.util.ImageUtil.setSafeImageURI(DeleteRecordsActivity.this, ivThumb, record.getPhotoUri());
                 ivThumb.setVisibility(View.VISIBLE);
             } catch (Exception ignored) {}
         }

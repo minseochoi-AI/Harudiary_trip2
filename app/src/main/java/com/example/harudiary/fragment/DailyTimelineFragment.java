@@ -157,12 +157,7 @@ public class DailyTimelineFragment extends Fragment {
             // 사진
             if (record.getPhotoUri() != null && !record.getPhotoUri().isEmpty()) {
                 try {
-                    Uri uri = Uri.parse(record.getPhotoUri());
-                    if (record.getPhotoUri().startsWith("content://")) {
-                        requireContext().getContentResolver().openInputStream(uri).close();
-                    }
-                    holder.ivPhoto.setImageURI(uri);
-                    holder.ivPhoto.setVisibility(View.VISIBLE);
+                    com.example.harudiary.util.ImageUtil.setSafeImageURI(requireContext(), holder.ivPhoto, record.getPhotoUri());
                 } catch (Exception e) {
                     holder.ivPhoto.setVisibility(View.GONE);
                 }
@@ -216,6 +211,9 @@ public class DailyTimelineFragment extends Fragment {
                 intent.putExtra(PlanInputActivity.EXTRA_DATE, date);
                 if (record.getContent() != null && !record.getContent().isEmpty()) {
                     intent.putExtra("EXTRA_CONTENT", record.getContent());
+                }
+                if (record.getAddress() != null && !record.getAddress().isEmpty()) {
+                    intent.putExtra("EXTRA_DESTINATION", record.getAddress());
                 }
                 startActivity(intent);
             });

@@ -105,7 +105,7 @@ public class ProfileFragment extends Fragment {
         String profileUri = session.getProfileImageUri();
         if (profileUri != null) {
             try {
-                ivProfile.setImageURI(Uri.parse(profileUri));
+                com.example.harudiary.util.ImageUtil.setSafeImageURI(requireContext(), ivProfile, profileUri);
                 ivProfile.setVisibility(View.VISIBLE);
                 tvAvatar.setVisibility(View.GONE);
             } catch (Exception e) {
@@ -138,7 +138,7 @@ public class ProfileFragment extends Fragment {
             if (uri != null) {
                 session.saveProfileImageUri(uri.toString());
                 try {
-                    ivProfile.setImageURI(uri);
+                    com.example.harudiary.util.ImageUtil.setSafeImageURI(requireContext(), ivProfile, uri.toString());
                     ivProfile.setVisibility(View.VISIBLE);
                     tvAvatar.setVisibility(View.GONE);
                 } catch (Exception e) {

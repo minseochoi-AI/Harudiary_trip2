@@ -293,7 +293,7 @@ public class FriendRecordActivity extends AppCompatActivity {
         ImageView ivPhoto = card.findViewById(R.id.iv_photo);
         if (record.getPhotoUri() != null && !record.getPhotoUri().isEmpty()) {
             try {
-                ivPhoto.setImageURI(Uri.parse(record.getPhotoUri()));
+                com.example.harudiary.util.ImageUtil.setSafeImageURI(FriendRecordActivity.this, ivPhoto, record.getPhotoUri());
                 ivPhoto.setVisibility(View.VISIBLE);
             } catch (Exception e) {
                 ivPhoto.setVisibility(View.GONE);
@@ -478,7 +478,7 @@ public class FriendRecordActivity extends AppCompatActivity {
             TimelineDTO r = withPhoto.get(i);
             View item = LayoutInflater.from(this).inflate(R.layout.item_route_photo, llRoutePhotos, false);
             ImageView iv = item.findViewById(R.id.iv_route_photo);
-            try { iv.setImageURI(Uri.parse(r.getPhotoUri())); } catch (Exception ignored) {}
+            try { com.example.harudiary.util.ImageUtil.setSafeImageURI(FriendRecordActivity.this, iv, r.getPhotoUri()); } catch (Exception ignored) {}
 
             final TimelineDTO rec = r;
             item.setOnClickListener(v -> onRoutePhotoClick(rec));
