@@ -88,8 +88,12 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
             });
         }
 
-        // 항목 클릭 시 상세(Daily)로 이동하는 로직 제거 (홈 상세 타임라인 보기에서만 쓰이도록 리다이렉트 수정)
-        // vh.itemView.setOnClickListener(v -> { ... });
+        // 항목 클릭 시 상세(Daily)로 이동하도록 콜백 복구 (다이어리 카드 클릭 시 확인 및 수정 진입)
+        vh.itemView.setOnClickListener(v -> {
+            if (listener != null && r.getDate() != null) {
+                listener.onDateClick(r.getDate());
+            }
+        });
     }
 
     @Override
