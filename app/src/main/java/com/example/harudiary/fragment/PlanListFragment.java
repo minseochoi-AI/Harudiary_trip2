@@ -105,9 +105,33 @@ public class PlanListFragment extends Fragment {
         });
     }
 
-    private void onPlanClick(String date) {
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).navigateToDaily(date);
-        }
+    private void onPlanClick(Record plan) {
+        if (plan.getActivityId() == null) return;
+        TravelApi travelApi = RetrofitClient.getClient().create(TravelApi.class);
+        travelApi.getPlanById(plan.getActivityId()).enqueue(new Callback<com.example.harudiary.model.TravelPlanResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull Response<com.example.harudiary.model.TravelPlanResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    if (!isAdded() || getActivity() == null) return;
+                    android.content.Intent intent = new android.content.Intent(requireContext(), com.example.harudiary.activity.TravelPlanActivity.class);
+                    intent.putExtra("plan", response.body());
+                    intent.putExtra("isConfirmMode", true);
+                    intent.putExtra("diaryId", plan.getActivityId());
+                    intent.putExtra("date", plan.getDate());
+                    startActivity(intent);
+                } else {
+                    if (isAdded() && getActivity() != null) {
+                        android.widget.Toast.makeText(requireContext(), "계획 상세를 불러오지 못했습니다.", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<com.example.harudiary.model.TravelPlanResponse> call, @NonNull Throwable t) {
+                if (isAdded() && getActivity() != null) {
+                    android.widget.Toast.makeText(requireContext(), "네트워크 오류", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }

@@ -21,7 +21,7 @@ public class PlanListAdapter extends RecyclerView.Adapter<PlanListAdapter.ViewHo
     private OnPlanClickListener listener;
 
     public interface OnPlanClickListener {
-        void onPlanClick(String date);
+        void onPlanClick(Record plan);
     }
 
     public PlanListAdapter(List<Record> plans, OnPlanClickListener listener) {
@@ -67,8 +67,8 @@ public class PlanListAdapter extends RecyclerView.Adapter<PlanListAdapter.ViewHo
         }
 
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null && plan.getDate() != null) {
-                listener.onPlanClick(plan.getDate());
+            if (listener != null) {
+                listener.onPlanClick(plan);
             }
         });
     }

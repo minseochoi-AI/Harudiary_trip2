@@ -32,7 +32,7 @@ def main():
     print("=== Harudiary 10단계 시연용 데이터 자동 주입 시작 ===")
     
     # User IDs
-    demo_user = "demo_user"
+    demo_user = "msc93913@gmail.com"
     demo_friend = "demo_friend"
     pending_user = "pending_user"
     search_user = "search_user"
