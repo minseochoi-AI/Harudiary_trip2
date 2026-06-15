@@ -220,34 +220,38 @@ public class RecordActivity extends AppCompatActivity {
 
         if (selectedPhotoUri != null && selectedPhotoUri.startsWith("content://")) {
             // Upload file first
-            try {
-                java.io.File file = com.example.harudiary.util.FileUtil.getFileFromUri(this, Uri.parse(selectedPhotoUri));
-                if (file == null) {
-                    Toast.makeText(this, "파일을 읽을 수 없습니다", Toast.LENGTH_SHORT).show();
-                    return;
+            new Thread(() -> {
+                try {
+                    java.io.File file = com.example.harudiary.util.FileUtil.getFileFromUri(RecordActivity.this, Uri.parse(selectedPhotoUri));
+                    if (file == null) {
+                        runOnUiThread(() -> Toast.makeText(RecordActivity.this, "파일을 읽을 수 없습니다", Toast.LENGTH_SHORT).show());
+                        return;
+                    }
+                    okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(okhttp3.MediaType.parse("image/*"), file);
+                    okhttp3.MultipartBody.Part body = okhttp3.MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+                    
+                    runOnUiThread(() -> {
+                        RetrofitClient.getInstance().create(com.example.harudiary.api.FileApi.class).uploadFile(body).enqueue(new retrofit2.Callback<java.util.Map<String, String>>() {
+                            @Override
+                            public void onResponse(@NonNull retrofit2.Call<java.util.Map<String, String>> call, @NonNull retrofit2.Response<java.util.Map<String, String>> response) {
+                                if (response.isSuccessful() && response.body() != null && response.body().containsKey("url")) {
+                                    selectedPhotoUri = response.body().get("url");
+                                    submitDiaryPayload(content);
+                                } else {
+                                    Toast.makeText(RecordActivity.this, "사진 업로드 실패", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                            @Override
+                            public void onFailure(@NonNull retrofit2.Call<java.util.Map<String, String>> call, @NonNull Throwable t) {
+                                Toast.makeText(RecordActivity.this, "업로드 네트워크 오류", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> Toast.makeText(RecordActivity.this, "파일 처리 오류", Toast.LENGTH_SHORT).show());
                 }
-                okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(okhttp3.MediaType.parse("image/*"), file);
-                okhttp3.MultipartBody.Part body = okhttp3.MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-                
-                RetrofitClient.getInstance().create(com.example.harudiary.api.FileApi.class).uploadFile(body).enqueue(new retrofit2.Callback<java.util.Map<String, String>>() {
-                    @Override
-                    public void onResponse(@NonNull retrofit2.Call<java.util.Map<String, String>> call, @NonNull retrofit2.Response<java.util.Map<String, String>> response) {
-                        if (response.isSuccessful() && response.body() != null && response.body().containsKey("url")) {
-                            selectedPhotoUri = response.body().get("url");
-                            submitDiaryPayload(content);
-                        } else {
-                            Toast.makeText(RecordActivity.this, "사진 업로드 실패", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    @Override
-                    public void onFailure(@NonNull retrofit2.Call<java.util.Map<String, String>> call, @NonNull Throwable t) {
-                        Toast.makeText(RecordActivity.this, "업로드 네트워크 오류", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(this, "파일 처리 오류", Toast.LENGTH_SHORT).show();
-            }
+            }).start();
         } else {
             // No photo or already uploaded
             submitDiaryPayload(content);
