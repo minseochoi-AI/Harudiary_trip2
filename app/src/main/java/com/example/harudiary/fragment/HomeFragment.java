@@ -564,20 +564,7 @@ public class HomeFragment extends Fragment {
 
     private void refreshFriendSection() { loadFriendBrowse(); updateBadge(); }
 
-    private void onDateClick(int year, int month, int day) {
-        if (calendarAdapter != null && calendarAdapter.isWeekMode()) {
-            startActivity(new Intent(requireContext(), DailyActivity.class)
-                    .putExtra("year", year)
-                    .putExtra("month", month + 1)
-                    .putExtra("day", day)
-            );
-        } else {
-            selectedDay = day;
-            updateCalendarUI(calendarAdapter != null ? calendarAdapter.getRecordDates() : new java.util.HashMap<>(),
-                    (currentYear == todayYear && currentMonth == todayMonth) ? todayDay : 0);
-            loadTodaySection();
-        }
-    }
+
 
     private void onDateClick(String date) {
         // 날짜 파싱하여 viewDay, viewMonth, viewYear 업데이트
