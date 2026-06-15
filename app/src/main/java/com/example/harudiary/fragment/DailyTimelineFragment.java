@@ -157,7 +157,11 @@ public class DailyTimelineFragment extends Fragment {
             // 사진
             if (record.getPhotoUri() != null && !record.getPhotoUri().isEmpty()) {
                 try {
-                    holder.ivPhoto.setImageURI(Uri.parse(record.getPhotoUri()));
+                    Uri uri = Uri.parse(record.getPhotoUri());
+                    if (record.getPhotoUri().startsWith("content://")) {
+                        requireContext().getContentResolver().openInputStream(uri).close();
+                    }
+                    holder.ivPhoto.setImageURI(uri);
                     holder.ivPhoto.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
                     holder.ivPhoto.setVisibility(View.GONE);

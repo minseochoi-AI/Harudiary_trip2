@@ -71,15 +71,7 @@ public class ActivityListAdapter extends RecyclerView.Adapter<ActivityListAdapte
         // 썸네일
         vh.ivThumbnail.setBackground(
                 ContextCompat.getDrawable(vh.itemView.getContext(), R.drawable.bg_thumbnail));
-        if (r.getPhotoUri() != null && !r.getPhotoUri().isEmpty()) {
-            try {
-                vh.ivThumbnail.setImageURI(Uri.parse(r.getPhotoUri()));
-            } catch (Exception ignored) {
-                vh.ivThumbnail.setImageURI(null);
-            }
-        } else {
-            vh.ivThumbnail.setImageURI(null);
-        }
+        com.example.harudiary.util.ImageUtil.setSafeImageURI(vh.itemView.getContext(), vh.ivThumbnail, r.getPhotoUri());
 
         // 항목 클릭 시 상세(Daily)로 이동하도록 콜백
         vh.itemView.setOnClickListener(v -> {

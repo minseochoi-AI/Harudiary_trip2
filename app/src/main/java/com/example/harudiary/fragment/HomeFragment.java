@@ -360,7 +360,7 @@ public class HomeFragment extends Fragment {
                 iv.setLayoutParams(lp);
                 iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 iv.setBackgroundResource(R.drawable.bg_thumbnail);
-                try { iv.setImageURI(Uri.parse(r.getPhotoUri())); } catch (Exception ignored) {}
+                com.example.harudiary.util.ImageUtil.setSafeImageURI(requireContext(), iv, r.getPhotoUri());
                 llTodayThumbs.addView(iv);
             }
 
@@ -400,7 +400,7 @@ public class HomeFragment extends Fragment {
                         
                         if (r.getPhotoUri() != null && !r.getPhotoUri().isEmpty()) {
                             ivPhoto.setVisibility(View.VISIBLE);
-                            try { ivPhoto.setImageURI(Uri.parse(r.getPhotoUri())); } catch (Exception ignored) {}
+                            com.example.harudiary.util.ImageUtil.setSafeImageURI(requireContext(), ivPhoto, r.getPhotoUri());
                         }
                         
                         llTimelinePreview.addView(previewView);
@@ -454,7 +454,7 @@ public class HomeFragment extends Fragment {
                             .inflate(R.layout.item_today_photo, llTodayPhotos, false);
                     ImageView iv = item.findViewById(R.id.iv_photo);
                     TextView tvSlot = item.findViewById(R.id.tv_slot);
-                    try { iv.setImageURI(Uri.parse(r.getPhotoUri())); } catch (Exception ignored) {}
+                    com.example.harudiary.util.ImageUtil.setSafeImageURI(requireContext(), iv, r.getPhotoUri());
                     String slot = r.getTimeSlot();
                     if (slot != null) {
                         tvSlot.setText(slotToKorean(slot));
