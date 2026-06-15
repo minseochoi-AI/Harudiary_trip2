@@ -347,6 +347,9 @@ public class FriendRecordActivity extends AppCompatActivity {
                 if (record.getContent() != null && !record.getContent().isEmpty()) {
                     intent.putExtra("EXTRA_CONTENT", record.getContent());
                 }
+                if (record.getAddress() != null && !record.getAddress().isEmpty()) {
+                    intent.putExtra("EXTRA_DESTINATION", record.getAddress());
+                }
                 startActivity(intent);
             });
         }

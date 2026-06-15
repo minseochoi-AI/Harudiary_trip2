@@ -82,6 +82,11 @@ public class PlanInputActivity extends AppCompatActivity {
             etContent.setText(prefillContent);
         }
         
+        String prefillDestination = getIntent().getStringExtra("EXTRA_DESTINATION");
+        if (prefillDestination != null && !prefillDestination.isEmpty()) {
+            etDestination.setText(prefillDestination);
+        }
+        
         updateDateUI();
     }
 
