@@ -567,23 +567,6 @@ public class HomeFragment extends Fragment {
 
 
     private void onDateClick(String date) {
-        // 날짜 파싱하여 viewDay, viewMonth, viewYear 업데이트
-        try {
-            String[] parts = date.split("-");
-            viewYear = Integer.parseInt(parts[0]);
-            viewMonth = Integer.parseInt(parts[1]) - 1;
-            viewDay = Integer.parseInt(parts[2]);
-            
-            selectedDay = viewDay;
-            if (currentMonth == viewMonth && currentYear == viewYear && calendarAdapter != null) {
-                calendarAdapter.setSelectedDay(selectedDay);
-            }
-        } catch (Exception e) {}
-        
-        loadTodaySection();
-        loadTodayPhotos();
-
-        // 사용자의 요청에 따라 달력 클릭 시 즉시 상세 일정(Daily) 화면으로 이동
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).navigateToDaily(date);
         }
